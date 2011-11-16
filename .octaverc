@@ -1,0 +1,27 @@
+function [] = cambiarEjeX(string, escala)
+  xt = get(gca,'XTick');
+  for i = 1:length(xt)
+    xtl{i} = sprintf(string ,xt(i)*escala);
+  end
+  set(gca,'XTickLabel',xtl);
+end
+
+function [] = cambiarEjeY(string, escala)
+  yt = get(gca,'YTick');
+  for i = 1:length(yt)
+    ytl{i} = sprintf(string ,yt(i)*escala);
+  end
+  set(gca,'YTickLabel',ytl);
+end
+
+
+function [salida] = guardarImagen(nombre)
+  print(nombre, '-dpdfwrite','-tight');
+  salida = nombre;
+end
+
+function [salida] = chirp_no_modulada(t)
+  k2=-20e6;
+  k1=2e12;
+  salida = e.^(j*(2*pi*(k1*t.^2+k2*t)));
+end

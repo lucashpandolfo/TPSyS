@@ -1,0 +1,177 @@
+#+LATEX_HEADER: \pagestyle{fancy}
+#+LATEX_HEADER: \setlength{\parskip}{0.3cm}
+#+TITLE: 
+#+OPTIONS:  toc:nil
+
+#+LATEX_HEADER: \lhead{\includegraphics[width=1.5cm]{img/Logo-fiuba}} \chead{66.74  - Señales y Sistemas} \rhead{\Huge FIUBA}
+#+LATEX_HEADER: \lfoot{88581 - Pandolfo Lucas} \cfoot{\thepage} \rfoot{$2^{do}$ cuatrimestre 2011}
+
+* TP especial
+** Ejercicio 1
+   #+LABEL: fig-r-rangos
+   #+CAPTION: \gamma-rangos
+   #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
+   [[file:img/r-rangos.pdf]]
+
+#+BEGIN_LATEX
+  \begin{eqnarray*}
+    R_1 &=& sen(\eta_1) r_1 \\
+    R_1 &=& sen(\eta_1) \left(r_0 + \frac{c\,T_s}{2}\right)\\
+    \\
+    R_0 &=& sen(\eta_0) r_0\\
+    \\
+    \Delta R_1 &=& R_1 - R_0 \\
+    \Delta R_1 &=&  sen(\eta_1) \left(r_0 + \frac{c\,T_s}{2}\right) -  sen(\eta_0) r_0 \\
+    \\
+    \Delta R_k &=&  sen(\eta_k) \left(r_0 + \frac{k\,c\,T_s}{2}\right) -  sen(\eta_0) r_0 \\
+    \\
+    \gamma-rango_k = r_k &=& \frac{h}{cos(\eta_k)}\\
+    \\
+    \eta_k &=& cos^{-1}\left(\frac{h}{r_k}\right)
+  \end{eqnarray*}  
+#+END_LATEX
+
+*** TODO graficos
+
+** Ejercicio 2
+
+   La señal chirp se define como
+
+   $$chirp(t) = e^{j\theta(t)}$$
+
+   donde $\theta(t)$ es una función cuadrática del tiempo con forma
+
+   $$\theta(t) = k_1 t^2 + k_2 t$$
+
+   La frecuencia instantánea de la chirp es entonces:
+
+   $$f\_inst(t) = 2 k_1 t + k_2$$
+
+   Como la chirp barre frecuencias que van desde -20Mhz hasta 20Mhz en
+   10$\mu s$:
+
+   $$f\_inst(0) = 2 k_1 0 + k_2 = k2 = -20 Mhz$$
+
+   Y al final
+
+#+BEGIN_LATEX
+  \begin{eqnarray*}
+    f\_inst(10\mu s) = 2 k_1 10\mu s + k_2 &=& 20 Mhz \\
+                       2 k_1 10\mu s - 20Mhz &=& 20 Mhz \\
+                       k_1 &=& \frac{40Mhz}{2\, 10\mu s}\\
+                       k_1 = 2\,\,10^{12}
+  \end{eqnarray*}
+#+END_LATEX
+
+   Por lo tanto, la fase instantánea es
+
+   $$f\_inst(t) =  2\,10^{12} t^2 - 20\,10^6 t$$
+
+   En la figura \ref{fig-chirp-no-modulada} se puede ver el resultado
+   de graficar las partes real e imaginarias de la chirp junto con la
+   fase instantánea en función del tiempo.
+
+    #+LABEL: fig-chirp-no-modulada
+    #+CAPTION: Chirp emitida por el SARAT (no modulada)
+    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/160e6:10e-6
+  chirp_nm = chirp_no_modulada(t);
+  subplot(311);
+  plot(t,real(chirp_nm), "linewidth", 3);
+  title("Parte real");
+  axis([0 t(end)])
+  cambiarEjeX("%.00fus",1e6);
+  subplot(312);
+  plot(t,imag(chirp_nm), "linewidth", 3);
+  title("Parte imaginaria");
+  axis([0 t(end)])
+  cambiarEjeX("%.00fus",1e6);
+  subplot(313);
+  plot(t,arg(chirp_nm), "linewidth", 3);
+  title("Fase");
+  axis([0 t(end) -pi pi])
+  cambiarEjeX("%.00fus",1e6);
+  set(gca, 'ytick', [-pi -pi/2 0 pi/2 pi])
+  set(gca, 'interpreter', 'tex');
+  set(gca,'YTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
+  ans = guardarImagen("img/chirp-no-modulada.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-no-modulada.pdf]]
+
+    #+LABEL: fig-chirp-no-modulada-no-nyquist
+    #+CAPTION: Chirp emitida por el SARAT (no modulada) submuestreada
+    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/30e6:10e-6
+  chirp_nm = chirp_no_modulada(t);
+  subplot(311);
+  plot(t,real(chirp_nm), "linewidth", 3);
+  title("Parte real");
+  axis([0 t(end)])
+  cambiarEjeX("%.00fus",1e6);
+  subplot(312);
+  plot(t,imag(chirp_nm), "linewidth", 3);
+  title("Parte imaginaria");
+  axis([0 t(end)])
+  cambiarEjeX("%.00fus",1e6);
+  subplot(313);
+  plot(t,arg(chirp_nm), "linewidth", 3);
+  title("Fase");
+  axis([0 t(end) -pi pi])
+  cambiarEjeX("%.00fus",1e6);
+  set(gca, 'ytick', [-pi -pi/2 0 pi/2 pi])
+  set(gca, 'interpreter', 'tex');
+  set(gca,'YTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
+  ans = guardarImagen("img/chirp-no-modulada-submuestreada.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-no-modulada-submuestreada.pdf]]
+
+    #+LABEL: fig-espectro-chirp-no-modulada
+    #+CAPTION: Espectro de la  Chirp emitida por el SARAT (no modulada)
+    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/160e6:10e-6
+  chirp_nm = chirp_no_modulada(t);
+  fase = fftshift(fft(chirp_nm));
+  plot(t,20*log10(abs(fase)), "linewidth", 3);
+  axis([0 t(end)])
+  grid();
+  ans = guardarImagen("img/fase-chirp-no-modulada.pdf");
+#+end_src
+#+results:
+   [[file:img/fase-chirp-no-modulada.pdf]]
+
+   La chirp tiene un ancho de banda de 20Mhz y por Nyquist la mínima
+   frecuencia de muestreo que podemos usar es 40Mhz, si no se
+   satisface el criterio de Nyquist se producen resultados como el de
+   la figura \ref{fig-chirp-no-modulada-no-nyquist}.
+
+
+** Ejercicio 3
+
+    #+LABEL: fig-chirp-no-modulada-espectrograma
+    #+CAPTION: Espectrograma de la Chirp emitida por el SARAT (no modulada)
+    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/80e6:10e-6*10;
+  chirp_nm = real(chirp_no_modulada(t))
+  specgram(chirp_nm,[],80e6,100,99);
+  ans = guardarImagen("img/chirp-no-modulada-espectro.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-no-modulada-espectro.pdf]]
+
+    #+LABEL: fig-chirp-no-modulada-espectrograma-submuestreada
+    #+CAPTION: Espectrograma de la Chirp emitida por el SARAT (no modulada) submuestreada
+    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/30e6:10e-6*10;
+  chirp_nm = real(chirp_no_modulada(t))
+  specgram(chirp_nm,[],30e6,100,99);
+  ans = guardarImagen("img/chirp-no-modulada-espectro-submuestreada.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-no-modulada-espectro-submuestreada.pdf]]
