@@ -1,3 +1,5 @@
+Fs=50e6;
+
 function [] = cambiarEjeX(string, escala)
   xt = get(gca,'XTick');
   for i = 1:length(xt)

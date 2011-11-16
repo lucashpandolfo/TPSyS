@@ -65,7 +65,7 @@
 
    Por lo tanto, la fase instantánea es
 
-   $$f\_inst(t) =  2\,10^{12} t^2 - 20\,10^6 t$$
+   $$f\_inst(t) =  4\,10^{12} t^2 - 20\,10^6 t$$
 
    En la figura \ref{fig-chirp-no-modulada} se puede ver el resultado
    de graficar las partes real e imaginarias de la chirp junto con la
@@ -75,7 +75,7 @@
     #+CAPTION: Chirp emitida por el SARAT (no modulada)
     #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  t = 0:1/160e6:10e-6
+  t = 0:1/Fs:10e-6
   chirp_nm = chirp_no_modulada(t);
   subplot(311);
   plot(t,real(chirp_nm), "linewidth", 3);
@@ -98,13 +98,13 @@
   ans = guardarImagen("img/chirp-no-modulada.pdf");
 #+end_src
 #+results:
-   [[file:img/chirp-no-modulada.pdf]]
+[[file:img/chirp-no-modulada.pdf]]
 
     #+LABEL: fig-chirp-no-modulada-no-nyquist
     #+CAPTION: Chirp emitida por el SARAT (no modulada) submuestreada
     #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  t = 0:1/30e6:10e-6
+  t = 0:1/(Fs/2):10e-6
   chirp_nm = chirp_no_modulada(t);
   subplot(311);
   plot(t,real(chirp_nm), "linewidth", 3);
@@ -127,22 +127,24 @@
   ans = guardarImagen("img/chirp-no-modulada-submuestreada.pdf");
 #+end_src
 #+results:
-   [[file:img/chirp-no-modulada-submuestreada.pdf]]
+[[file:img/chirp-no-modulada-submuestreada.pdf]]
 
     #+LABEL: fig-espectro-chirp-no-modulada
     #+CAPTION: Espectro de la  Chirp emitida por el SARAT (no modulada)
     #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  t = 0:1/160e6:10e-6
+  t = 0:1/(Fs):10e-6
   chirp_nm = chirp_no_modulada(t);
-  fase = fftshift(fft(chirp_nm));
-  plot(t,20*log10(abs(fase)), "linewidth", 3);
-  axis([0 t(end)])
+  espectro = fft(chirp_nm);
+  plot(Fs/t(end) * t,20*log10(abs(espectro)), "linewidth", 3);
+  axis([0 Fs 0 30])
+  cambiarEjeX("%0.0fMhz", 1/1e6);
+  cambiarEjeY("%ddB", 1);
   grid();
-  ans = guardarImagen("img/fase-chirp-no-modulada.pdf");
+  ans = guardarImagen("img/espectro-chirp-no-modulada.pdf");
 #+end_src
 #+results:
-   [[file:img/fase-chirp-no-modulada.pdf]]
+[[file:img/espectro-chirp-no-modulada.pdf]]
 
    La chirp tiene un ancho de banda de 20Mhz y por Nyquist la mínima
    frecuencia de muestreo que podemos usar es 40Mhz, si no se
@@ -156,22 +158,84 @@
     #+CAPTION: Espectrograma de la Chirp emitida por el SARAT (no modulada)
     #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  t = 0:1/80e6:10e-6*10;
+  t = 0:1/Fs:10e-6*10;
   chirp_nm = real(chirp_no_modulada(t))
-  specgram(chirp_nm,[],80e6,100,99);
+  specgram(chirp_nm,[],Fs,50,49);
   ans = guardarImagen("img/chirp-no-modulada-espectro.pdf");
 #+end_src
 #+results:
-   [[file:img/chirp-no-modulada-espectro.pdf]]
+[[file:img/chirp-no-modulada-espectro.pdf]]
 
     #+LABEL: fig-chirp-no-modulada-espectrograma-submuestreada
     #+CAPTION: Espectrograma de la Chirp emitida por el SARAT (no modulada) submuestreada
     #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  t = 0:1/30e6:10e-6*10;
+  t = 0:1/(Fs/2):10e-6*10;
   chirp_nm = real(chirp_no_modulada(t))
-  specgram(chirp_nm,[],30e6,100,99);
+  specgram(chirp_nm,[],Fs/2,50,49);
   ans = guardarImagen("img/chirp-no-modulada-espectro-submuestreada.pdf");
 #+end_src
 #+results:
-   [[file:img/chirp-no-modulada-espectro-submuestreada.pdf]]
+[[file:img/chirp-no-modulada-espectro-submuestreada.pdf]]
+
+*** TODO Tipo y ancho de ventana, explicación
+
+** Ejercicio 4
+
+   Como ya se mostró en el punto 2, la frecuencia instantánea de la
+   chirp (figure \ref{fig-chirp-frecuencia-instantanea}) es
+
+   $$f\_inst(t) = 2 k_1 t + k_2$$
+
+   Donde $k_2$ es la frecuencia inicial y $2 k_1$ es el incremento de
+   frecuencia por unidad de tiempo
+
+   #+LABEL: fig-chirp-frecuencia-instantanea
+   #+CAPTION: Frecuencia instantánea de la chirp
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/Fs:10e-6;
+  plot(t,4e12*t-20e6, 'linewidth', 5);
+  axis([0 t(end)]);
+  cambiarEjeX("%0.0fus", 1e6);
+  cambiarEjeY("%0.0fMhz", 1/1e6);
+  grid();
+  ans = guardarImagen("img/chirp-frecuencia-instantanea.pdf");
+#+end_src
+#+results:
+[[file:img/chirp-frecuencia-instantanea.pdf]]
+
+*** TODO ancho de banda(k1,k2,T)
+
+** Ejercicio 5
+
+   #+LABEL: fig-espectros-modulador-ideal
+   #+CAPTION: Espectro de las señales en las diferentes fases del modulador (ideal)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/Fs:10e-6;
+  chirp_nm = chirp_no_modulada(t);
+  espectroA = fft(chirp_nm);
+  plot(Fs/t(end) * t,20*log10(abs(espectroA)), "linewidth", 3);
+  axis([0 Fs 0 30])
+  cambiarEjeX("%0.0fMhz", 1/1e6);
+  cambiarEjeY("%ddB", 1);
+  grid();
+  
+  Fs2 = 500e6;
+  w0=2*pi*200e6;
+  t2= 0:1/Fs2:200e-6;
+  exp1 = e.^(j*w0*t2);
+  espectroB = fft(exp1);
+  plot(Fs2/t2(end) * t2,20*log10(abs(espectroB)), "linewidth", 3);
+  axis([0 Fs2])
+  cambiarEjeX("%0.0fMhz", 1/1e6);
+  cambiarEjeY("%ddB", 1);
+  grid();
+  
+  
+  
+  ans = guardarImagen("img/espectros-modulador-ideal.pdf");
+#+end_src
+#+results:
+[[file:img/espectros-modulador-ideal.pdf]]
