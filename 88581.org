@@ -146,8 +146,8 @@
 #+results:
 [[file:img/espectro-chirp-no-modulada.pdf]]
 
-   La chirp tiene un ancho de banda de 20Mhz y por Nyquist la mínima
-   frecuencia de muestreo que podemos usar es 40Mhz, si no se
+   La chirp tiene una frecuencia máxima de 20Mhz y por Nyquist la
+   mínima frecuencia de muestreo que podemos usar es 40Mhz, si no se
    satisface el criterio de Nyquist se producen resultados como el de
    la figura \ref{fig-chirp-no-modulada-no-nyquist}.
 
@@ -182,13 +182,19 @@
 
 ** Ejercicio 4
 
-   Como ya se mostró en el punto 2, la frecuencia instantánea de la
-   chirp (figure \ref{fig-chirp-frecuencia-instantanea}) es
+   La chirp está definida como:
+
+   $$chirp(t) = e^{j \phi(t)}$$
+
+   Donde $\phi(t)$ es la fase en función del tiempo.Como ya se mostró
+   en el punto 2, la frecuencia instantánea
+   $\left(\frac{\partial\phi}{\partial t}\right)$ de la chirp (figura
+   \ref{fig-chirp-frecuencia-instantanea}) es
 
    $$f\_inst(t) = 2 k_1 t + k_2$$
 
    Donde $k_2$ es la frecuencia inicial y $2 k_1$ es el incremento de
-   frecuencia por unidad de tiempo
+   frecuencia por unidad de tiempo.
 
    #+LABEL: fig-chirp-frecuencia-instantanea
    #+CAPTION: Frecuencia instantánea de la chirp
@@ -205,7 +211,8 @@
 #+results:
 [[file:img/chirp-frecuencia-instantanea.pdf]]
 
-*** TODO ancho de banda(k1,k2,T)
+
+** TODO ancho de banda formalmente
 
 ** Ejercicio 5
 
