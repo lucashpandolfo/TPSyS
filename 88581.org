@@ -212,7 +212,7 @@
 [[file:img/chirp-frecuencia-instantanea.pdf]]
 
 
-** TODO ancho de banda formalmente
+*** TODO ancho de banda formalmente
 
 ** Ejercicio 5
 
@@ -231,7 +231,7 @@
   
   Fs2 = 500e6;
   w0=2*pi*200e6;
-  t2= 0:1/Fs2:200e-6;
+  t2= 0:1/Fs2:10e-6;
   exp1 = e.^(j*w0*t2);
   espectroB = fft(exp1);
   plot(Fs2/t2(end) * t2,20*log10(abs(espectroB)), "linewidth", 3);
@@ -240,9 +240,67 @@
   cambiarEjeY("%ddB", 1);
   grid();
   
-  
+  producto = exp1 * chirp_nm;
   
   ans = guardarImagen("img/espectros-modulador-ideal.pdf");
 #+end_src
 #+results:
-[[file:img/espectros-modulador-ideal.pdf]]
+   [[file:img/espectros-modulador-ideal.pdf]]
+
+*** TODO 
+
+** Ejercicio 9
+   #+LABEL: fig-datos-crudos
+   #+CAPTION: Datos crudos del SARAT (subset)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  datos = cargarMatriz();
+  colormap('gray');
+  imagesc(20*log10(abs(datos)));
+  ans = guardarImagen("img/datos-crudos.pdf");
+#+end_src
+#+results:
+   [[file:img/datos-crudos.pdf]]
+
+*** TODO cálculos
+
+** Ejercicio 10
+
+   #+LABEL: fig-chirp-real
+   #+CAPTION: Chirp real del SARAT
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  datos = cargarMatriz();
+  subplot(311);
+  plot(0:499,real(datos(1,16:515)),'linewidth', 4)
+  title('Parte Real');
+  subplot(312);
+  plot(0:499,imag(datos(1,16:515)),'linewidth', 4)
+  title('Parte Imaginaria');
+  subplot(313);
+  plot(0:499,angle(datos(1,16:515)),'linewidth', 4)
+  title('Fase');
+  axis([0 499 -pi pi])
+  set(gca, 'ytick', [-pi -pi/2 0 pi/2 pi])
+  set(gca, 'interpreter', 'tex');
+  set(gca,'YTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
+  ans = guardarImagen("img/chirp-real.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-real.pdf]]
+
+   #+LABEL: fig-chirp-real-espectro
+   #+CAPTION: Chirp real del SARAT (espectro)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  datos = cargarMatriz();
+  espectro = abs(fft(datos(1,17:516)));
+  plot(20*log10(espectro), 'linewidth', 4)
+  cambiarEjeX("%.0fMhz",1/10);
+  grid();
+  ans = guardarImagen("img/chirp-real-espectro.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-real-espectro.pdf]]
+
+   
