@@ -221,15 +221,19 @@
    #+CAPTION: Espectro de las señales en las diferentes fases del modulador (ideal)
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
+
+  subplot(411);
   t = 0:1/Fs:10e-6;
   chirp_nm = chirp_no_modulada(t);
   espectroA = fft(chirp_nm);
+  espectroReal = fft(real(chirp_nm));
   plot(Fs/t(end) * t,20*log10(abs(espectroA)), "linewidth", 3);
   axis([0 Fs 0 30])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
-  
+
+  subplot(412);
   Fs2 = 500e6;
   w0=2*pi*200e6;
   t2= 0:1/Fs2:10e-6;
@@ -240,9 +244,23 @@
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
-  
-  producto = exp1 * chirp_nm;
-  
+
+  subplot(413);
+  desvio = Fs/2;
+  plot(Fs/t(end) * t+200e6-desvio,20*log10(abs(espectroA)), "linewidth", 3);
+  axis([200e6-desvio 200e6+desvio 0 30])
+  cambiarEjeX("%0.0fMhz", 1/1e6);
+  cambiarEjeY("%ddB", 1);
+  grid();
+
+  subplot(414);
+  desvio = Fs/2;
+  plot(Fs/t(end) * t+200e6-desvio,20*log10(abs(espectroReal)), "linewidth", 3);
+  axis([200e6-desvio 200e6+desvio 0 30])
+  cambiarEjeX("%0.0fMhz", 1/1e6);
+  cambiarEjeY("%ddB", 1);
+  grid();
+
   ans = guardarImagen("img/espectros-modulador-ideal.pdf");
 #+end_src
 #+results:
