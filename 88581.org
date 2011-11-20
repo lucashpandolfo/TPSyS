@@ -306,3 +306,7 @@
    [[file:img/chirp-real-espectro.pdf]]
 
    
+* Compresión del pulso
+* Compresión en rango
+* Compresión en Azimuth
+* Algoritmo de compresión
