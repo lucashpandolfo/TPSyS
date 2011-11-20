@@ -6,7 +6,7 @@
 #+LATEX_HEADER: \lhead{\includegraphics[width=1.5cm]{img/Logo-fiuba}} \chead{66.74  - Señales y Sistemas} \rhead{\Huge FIUBA}
 #+LATEX_HEADER: \lfoot{88581 - Pandolfo Lucas} \cfoot{\thepage} \rfoot{$2^{do}$ cuatrimestre 2011}
 
-* TP especial
+* Principios básicos
 ** Ejercicio 1
    #+LABEL: fig-r-rangos
    #+CAPTION: \gamma-rangos
@@ -33,6 +33,7 @@
 
 *** TODO graficos
 
+* Parte analógica
 ** Ejercicio 2
 
    La señal chirp se define como
@@ -249,6 +250,7 @@
 
 *** TODO 
 
+* Parte digital
 ** Ejercicio 9
    #+LABEL: fig-datos-crudos
    #+CAPTION: Datos crudos del SARAT (subset)
