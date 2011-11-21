@@ -2,7 +2,7 @@
 #+LATEX_HEADER: \setlength{\parskip}{0.3cm}
 #+TITLE: 
 #+OPTIONS:  toc:nil
-
+#+STARTUP: (color-theme-euphoria)
 #+LATEX_HEADER: \lhead{\includegraphics[width=1.5cm]{img/Logo-fiuba}} \chead{66.74  - Señales y Sistemas} \rhead{\Huge FIUBA}
 #+LATEX_HEADER: \lfoot{88581 - Pandolfo Lucas} \cfoot{\thepage} \rfoot{$2^{do}$ cuatrimestre 2011}
 
@@ -221,46 +221,45 @@
    #+CAPTION: Espectro de las señales en las diferentes fases del modulador (ideal)
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-
+  
   subplot(411);
+  Fs=3000e6;
   t = 0:1/Fs:10e-6;
   chirp_nm = chirp_no_modulada(t);
   espectroA = fft(chirp_nm);
-  espectroReal = fft(real(chirp_nm));
   plot(Fs/t(end) * t,20*log10(abs(espectroA)), "linewidth", 3);
-  axis([0 Fs 0 30])
+  axis([0 Fs])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
-
+  
   subplot(412);
-  Fs2 = 500e6;
-  w0=2*pi*200e6;
-  t2= 0:1/Fs2:10e-6;
-  exp1 = e.^(j*w0*t2);
-  espectroB = fft(exp1);
-  plot(Fs2/t2(end) * t2,20*log10(abs(espectroB)), "linewidth", 3);
-  axis([0 Fs2])
+  exponencial = e.^(j*2*pi*200e6*t);
+  producto = chirp_nm .* exponencial;
+  espectroCorrido = abs(fft(producto));
+  plot(Fs/t(end) * t, 20*log10(espectroCorrido), "linewidth", 3);
+  axis([0 Fs])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
-
+  
   subplot(413);
-  desvio = Fs/2;
-  plot(Fs/t(end) * t+200e6-desvio,20*log10(abs(espectroA)), "linewidth", 3);
-  axis([200e6-desvio 200e6+desvio 0 30])
+  espectroReal = abs(fft(real(producto)));
+  plot(Fs/t(end) * t, 20*log10(espectroReal), "linewidth", 3);
+  axis([0 Fs])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
-
+  
   subplot(414);
-  desvio = Fs/2;
-  plot(Fs/t(end) * t+200e6-desvio,20*log10(abs(espectroReal)), "linewidth", 3);
-  axis([200e6-desvio 200e6+desvio 0 30])
+  coseno = cos(1100e6*2*pi*t);
+  espectroCoseno = abs(fft( real(producto).*coseno ));
+  plot(Fs/t(end) * t, 20*log10(espectroCoseno), "linewidth", 3);
+  axis([0 Fs])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
-
+  
   ans = guardarImagen("img/espectros-modulador-ideal.pdf");
 #+end_src
 #+results:
