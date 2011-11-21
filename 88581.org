@@ -2,7 +2,6 @@
 #+LATEX_HEADER: \setlength{\parskip}{0.3cm}
 #+TITLE: 
 #+OPTIONS:  toc:nil
-#+STARTUP: (color-theme-euphoria)
 #+LATEX_HEADER: \lhead{\includegraphics[width=1.5cm]{img/Logo-fiuba}} \chead{66.74  - Señales y Sistemas} \rhead{\Huge FIUBA}
 #+LATEX_HEADER: \lfoot{88581 - Pandolfo Lucas} \cfoot{\thepage} \rfoot{$2^{do}$ cuatrimestre 2011}
 
@@ -32,6 +31,8 @@
 #+END_LATEX
 
 *** TODO graficos
+
+\newpage
 
 * Parte analógica
 ** Ejercicio 2
@@ -267,6 +268,8 @@
 
 *** TODO 
 
+
+\newpage
 * Parte digital
 ** Ejercicio 9
    #+LABEL: fig-datos-crudos
@@ -322,8 +325,25 @@
 #+results:
    [[file:img/chirp-real-espectro.pdf]]
 
-   
+** Ejercicio 11   
+
+\newpage
 * Compresión del pulso
+** Ejercicio 13
+#+BEGIN_LATEX
+  \begin{eqnarray*}
+    {\mathcal F}| x[n] \star y[n]|(\Omega) &=& \sum_{n=-\infty}^{\infty} x[n] \star y[n] e^{-j\Omega n} \\
+    &=& \sum_{n=-\infty}^{\infty} \sum_{k=-\infty}^{\infty} x[k] y^*[k-n] e^{-j\Omega n} \\
+    &=& \sum_{k=-\infty}^{\infty} x[k] \sum_{n=-\infty}^{\infty} y^*[k-n] e^{-j\Omega n} \\
+    &=& \sum_{k=-\infty}^{\infty} x[k] Y^*(\Omega) e^{j\Omega k} \\
+    &=& \sum_{k=-\infty}^{\infty} x[k]  e^{j\Omega k}  Y^*(\Omega) \\
+    &=& X(-\Omega)  Y^*(\Omega)
+  \end{eqnarray*}
+#+END_LATEX
+
+\newpage   
 * Compresión en rango
-* Compresión en Azimuth
+\newpage
+* Compresión en azimuth
+\newpage
 * Algoritmo de compresión
