@@ -268,6 +268,10 @@
   fc2 = ceil((1300e6+30e6)*t(end));
   filtro(1,fc1:fc2) = 1;
   
+  fc1 = ceil((1700e6-30e6)*t(end));
+  fc2 = ceil((1700e6+30e6)*t(end));
+  filtro(1,fc1:fc2) = 1;
+  
   espectroFiltro = espectroCoseno.*filtro;
   plot(Fs/t(end) * t, 20*log10(espectroFiltro), "linewidth", 3);
   axis([0 Fs])
@@ -339,7 +343,7 @@
 #+results:
    [[file:img/chirp-real-espectro.pdf]]
 
-** Ejercicio 11   
+** Ejercicio 11
 
 \newpage
 * Compresión del pulso
