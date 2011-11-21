@@ -223,7 +223,7 @@
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   
-  subplot(411);
+  subplot(511);
   Fs=3000e6;
   t = 0:1/Fs:10e-6;
   chirp_nm = chirp_no_modulada(t);
@@ -234,7 +234,7 @@
   cambiarEjeY("%ddB", 1);
   grid();
   
-  subplot(412);
+  subplot(512);
   exponencial = e.^(j*2*pi*200e6*t);
   producto = chirp_nm .* exponencial;
   espectroCorrido = abs(fft(producto));
@@ -244,7 +244,7 @@
   cambiarEjeY("%ddB", 1);
   grid();
   
-  subplot(413);
+  subplot(513);
   espectroReal = abs(fft(real(producto)));
   plot(Fs/t(end) * t, 20*log10(espectroReal), "linewidth", 3);
   axis([0 Fs])
@@ -252,10 +252,24 @@
   cambiarEjeY("%ddB", 1);
   grid();
   
-  subplot(414);
+  subplot(514);
   coseno = cos(1100e6*2*pi*t);
   espectroCoseno = abs(fft( real(producto).*coseno ));
   plot(Fs/t(end) * t, 20*log10(espectroCoseno), "linewidth", 3);
+  axis([0 Fs])
+  cambiarEjeX("%0.0fMhz", 1/1e6);
+  cambiarEjeY("%ddB", 1);
+  grid();
+  
+  %filtro ideal
+  subplot(515);
+  filtro = zeros(1,length(t));
+  fc1 = ceil((1300e6-30e6)*t(end));
+  fc2 = ceil((1300e6+30e6)*t(end));
+  filtro(1,fc1:fc2) = 1;
+  
+  espectroFiltro = espectroCoseno.*filtro;
+  plot(Fs/t(end) * t, 20*log10(espectroFiltro), "linewidth", 3);
   axis([0 Fs])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
@@ -330,6 +344,9 @@
 \newpage
 * Compresión del pulso
 ** Ejercicio 13
+
+   La relación entre la correlación de dos funciones con su
+   transformada de Fourier es la siguiente:
 #+BEGIN_LATEX
   \begin{eqnarray*}
     {\mathcal F}| x[n] \star y[n]|(\Omega) &=& \sum_{n=-\infty}^{\infty} x[n] \star y[n] e^{-j\Omega n} \\
