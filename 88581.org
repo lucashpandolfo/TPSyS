@@ -284,8 +284,7 @@
 #+results:
    [[file:img/espectros-modulador-ideal.pdf]]
 
-*** TODO 
-
+*** TODO atenuación (después de verificar que las cosas sean potables)
 
 \newpage
 * Parte digital
@@ -345,12 +344,52 @@
 
 ** Ejercicio 11
 
+   #+LABEL: fig-modulo-espectro-rango
+   #+CAPTION: Modulo del espectro en rango
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  datos = cargarMatriz();
+  datos_no_chirp = datos(201:end,350:end);
+  espectros = abs(fft(datos_no_chirp, [] ,2)); #fft de cada fila
+  espectro = sum(espectros,2)/rows(datos_no_chirp);
+  plot(20*log10(espectro), 'linewidth', 4)
+
+  cambiarEjeY("%ddB", 1);
+
+  grid();
+  ans = guardarImagen("img/espectro-rango.pdf");
+#+end_src
+#+results:
+   [[file:img/espectro-rango.pdf]]
+
+   #+LABEL: fig-modulo-espectro-azimuth
+   #+CAPTION: Modulo del espectro en azimuth
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  datos = cargarMatriz();
+  datos_no_chirp = datos(201:end,350:end);
+  espectros = abs(fft(datos_no_chirp, [] ,1)); #fft de cada columna
+  espectro = sum(espectros,1)/columns(datos_no_chirp);
+  plot(20*log10(espectro), 'linewidth', 4)
+
+  axis([0 length(espectro)]);
+
+  cambiarEjeY("%ddB", 1);
+
+  grid();
+  ans = guardarImagen("img/espectro-azimuth.pdf");
+#+end_src
+#+results:
+   [[file:img/espectro-azimuth.pdf]]
+
 \newpage
 * Compresión del pulso
 ** Ejercicio 13
 
-   La relación entre la correlación de dos funciones con su
-   transformada de Fourier es la siguiente:
+   
+   La correlación no es una operación conmutativa. La relación entre
+   la correlación de dos funciones con su transformada de Fourier es
+   la siguiente:
 #+BEGIN_LATEX
   \begin{eqnarray*}
     {\mathcal F}| x[n] \star y[n]|(\Omega) &=& \sum_{n=-\infty}^{\infty} x[n] \star y[n] e^{-j\Omega n} \\
@@ -362,6 +401,7 @@
   \end{eqnarray*}
 #+END_LATEX
 
+*** TODO explicar la relación con la convolución. Contraejemplo de conmutatividad
 \newpage   
 * Compresión en rango
 \newpage
