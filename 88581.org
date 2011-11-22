@@ -311,13 +311,14 @@
 #+begin_src octave :exports results :results file
   datos = cargarMatriz();
   subplot(311);
-  plot(0:499,real(datos(1,16:515)),'linewidth', 4)
+  chirp_real = cargarChirp();
+  plot(0:499,real(chirp_real),'linewidth', 4)
   title('Parte Real');
   subplot(312);
-  plot(0:499,imag(datos(1,16:515)),'linewidth', 4)
+  plot(0:499,imag(chirp_real),'linewidth', 4)
   title('Parte Imaginaria');
   subplot(313);
-  plot(0:499,angle(datos(1,16:515)),'linewidth', 4)
+  plot(0:499,angle(chirp_real),'linewidth', 4)
   title('Fase');
   axis([0 499 -pi pi])
   set(gca, 'ytick', [-pi -pi/2 0 pi/2 pi])
@@ -332,15 +333,15 @@
    #+CAPTION: Chirp real del SARAT (espectro)
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  datos = cargarMatriz();
-  espectro = abs(fft(datos(1,17:516)));
+  chirp_real = cargarChirp();
+  espectro = abs(fft(chirp_real));
   plot(20*log10(espectro), 'linewidth', 4)
   cambiarEjeX("%.0fMhz",1/10);
   grid();
   ans = guardarImagen("img/chirp-real-espectro.pdf");
 #+end_src
 #+results:
-   [[file:img/chirp-real-espectro.pdf]]
+[[file:img/chirp-real-espectro.pdf]]
 
 ** Ejercicio 11
 
@@ -402,6 +403,22 @@
 #+END_LATEX
 
 *** TODO explicar la relación con la convolución. Contraejemplo de conmutatividad
+
+
+** Ejercicio 14
+
+   #+LABEL: fig-simulacion-autocorrelacion
+   #+CAPTION: Autocorrelación de la chirp del SARAT
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  chirp = cargarChirp();
+  grid();
+  ans = guardarImagen("img/espectro-azimuth.pdf");
+#+end_src
+#+results:
+   [[file:img/espectro-azimuth.pdf]]
+
+
 \newpage   
 * Compresión en rango
 \newpage
