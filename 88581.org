@@ -222,11 +222,13 @@
 #+begin_src octave :exports results :results file
   t = 0:1/Fs:10e-6*10;
   chirp_nm = real(chirp_no_modulada(t))
-  specgram(chirp_nm,[],Fs,50,49);
+  specgram(chirp_nm,[],Fs,50,40);
+  cambiarEjeY("%0.0fMhz", 1e-6);
+  cambiarEjeX("%0.0fus", 1e6);
   ans = guardarImagen("img/chirp-no-modulada-espectro.pdf");
 #+end_src
 #+results:
-[[file:img/chirp-no-modulada-espectro.pdf]]
+   [[file:img/chirp-no-modulada-espectro.pdf]]
 
     #+LABEL: fig-chirp-no-modulada-espectrograma-submuestreada
     #+CAPTION: Espectrograma de la Chirp emitida por el SARAT (no modulada) submuestreada
@@ -234,13 +236,80 @@
 #+begin_src octave :exports results :results file
   t = 0:1/(Fs/2):10e-6*10;
   chirp_nm = real(chirp_no_modulada(t))
-  specgram(chirp_nm,[],Fs/2,50,49);
+  specgram(chirp_nm,[],Fs/2,50,40);
+  cambiarEjeY("%0.0fMhz", 1e-6);
+  cambiarEjeX("%0.0fus", 1e6);
   ans = guardarImagen("img/chirp-no-modulada-espectro-submuestreada.pdf");
 #+end_src
 #+results:
-[[file:img/chirp-no-modulada-espectro-submuestreada.pdf]]
+   [[file:img/chirp-no-modulada-espectro-submuestreada.pdf]]
 
-*** TODO Tipo y ancho de ventana, explicación
+   El uso de diferentes tipos de ventana altera los contenidos de
+   frecuencia de la señal original. En las figura
+   \ref{fig-comparacion-ventanas} se muestra una comparación de
+   aplicar diferentes tipos de ventanas a las primeras 100 muestras de
+   la chirp generada en puntos anteriores y en la figura
+   \ref{fig-comparacion-ventanas2} se muestran los resultados de
+   utilizar cada una de estas ventanas al espectrograma.
+
+    #+LABEL: fig-comparacion-ventanas
+    #+CAPTION: Comparación de diferentes tipos de ventanas
+    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/(Fs):10e-6*10;
+  chirp_nm = real(chirp_no_modulada(t))
+  longitud = 100;
+  inicio = 20;
+  chirp_window = chirp_nm(inicio:inicio+longitud-1);
+  ventanas{1} = {rectwin(longitud), "Rectangular"};
+  ventanas{2} = {tukeywin(longitud), "Tukey"};
+  ventanas{3} = {hann(longitud), "Hann"};
+  ventanas{4} = {bartlett(longitud), "Bartlett"};
+  
+  max = length(ventanas);
+  for i = 1:max
+    subplot(max,2,2*i-1)
+    plot(ventanas{i}{1}, 'linewidth', 3);
+    title(ventanas{i}{2});
+    subplot(max,2,2*i)
+    plot(abs(fftshift(fft(ventanas{i}{1}.'.*chirp_window))),'linewidth', 3);
+  #  title(ventanas{i}{2});
+  end
+  
+  ans = guardarImagen("img/comparacion-ventanas.pdf");
+#+end_src
+#+results:
+   [[file:img/comparacion-ventanas.pdf]]
+
+    #+LABEL: fig-comparacion-ventanas2
+    #+CAPTION: Comparación de diferentes tipos de ventanas (espectrogramas)
+    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/(Fs):10e-6*10;
+  chirp_nm = real(chirp_no_modulada(t))
+  longitud = 50;
+  solapamiento= 25;
+  inicio = 20;
+  chirp_window = chirp_nm(inicio:inicio+longitud-1);
+  ventanas{1} = {rectwin(longitud), "Rectangular"};
+  ventanas{2} = {tukeywin(longitud), "Tukey"};
+  ventanas{3} = {hann(longitud), "Hann"};
+  ventanas{4} = {bartlett(longitud), "Bartlett"};
+  
+  max = length(ventanas);
+  for i = 1:max
+    subplot(max/2,2,i)
+    specgram(chirp_nm,[],Fs,ventanas{i}{1},solapamiento);
+    cambiarEjeY("%0.0fMhz", 1e-6);
+    cambiarEjeX("%0.0fus", 1e6);
+    title(ventanas{i}{2});
+  end
+  
+  ans = guardarImagen("img/comparacion-ventanas2.pdf");
+#+end_src
+#+results:
+   [[file:img/comparacion-ventanas2.pdf]]
+
 
 ** Ejercicio 4
 
