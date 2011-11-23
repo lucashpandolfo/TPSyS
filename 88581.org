@@ -14,24 +14,84 @@
 
 #+BEGIN_LATEX
   \begin{eqnarray*}
-    R_1 &=& sen(\eta_1) r_1 \\
-    R_1 &=& sen(\eta_1) \left(r_0 + \frac{c\,T_s}{2}\right)\\
+    R_n &=& sen(\eta_n) r_n \\
     \\
-    R_0 &=& sen(\eta_0) r_0\\
+    \Delta R_n &=& R_n - R_{n-1} \\
+    \Delta R_n &=&  sen(\eta_n) r_n -  sen(\eta_{n-1}) r_{n-1} \\
     \\
-    \Delta R_1 &=& R_1 - R_0 \\
-    \Delta R_1 &=&  sen(\eta_1) \left(r_0 + \frac{c\,T_s}{2}\right) -  sen(\eta_0) r_0 \\
-    \\
-    \Delta R_k &=&  sen(\eta_k) \left(r_0 + \frac{k\,c\,T_s}{2}\right) -  sen(\eta_0) r_0 \\
-    \\
+    \\ r_k &=& \frac{k c T_s}{2}\\
     \gamma-rango_k = r_k &=& \frac{h}{cos(\eta_k)}\\
     \\
     \eta_k &=& cos^{-1}\left(\frac{h}{r_k}\right)
   \end{eqnarray*}  
 #+END_LATEX
 
-*** TODO graficos
+   Para poder graficar $\eta_k$ y $\Delta R_k$, necesitamos primero
+   calular $r_o$. Sabiendo que:
 
+#+BEGIN_LATEX
+  \begin{eqnarray*}
+    Fs &=& 50\, 10^6\\
+    Ts &=& \frac{1}{Fs} = 50\, 10^{-6}\\
+    h  &=& 5375 m\\
+    \eta_0 &=& \eta_{near} = 18.24° \\
+    c &=& 299.792.458 \frac{m}{s}  
+  \end{eqnarray*}
+#+END_LATEX
+
+   Podemos calcular $r_0$ como $\frac{h}{cos(\eta_0)}$ que resulta
+   en $$r_0 \approx 5659$$
+
+    #+LABEL: fig-eta-vs-rango
+    #+CAPTION: $\eta$ en función del rango $r_k$
+    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  h = 5375;
+  n_near = 18.24*pi/180;
+  c = 299792458;
+  Ts = 50e-6;
+  kmax = 20;
+  r0 = h/(cos(n_near));
+  rangos = r0:c*Ts/2:r0+kmax*c*Ts/2;
+  plot(0:kmax,acos(h./rangos)*180/pi, 'linewidth', 4);
+  set(gca, 'interpreter', 'tex');
+  set(gca, 'ytick', 15:5:90);
+  axis([0 kmax 15 90]);
+  set(gca, 'xtick', 0:kmax);
+  cambiarEjeY("%0.0f^o",1);
+  cambiarEjeX("r_{%d}",1);
+  grid();
+  ans = guardarImagen("img/eta-vs-rango.pdf");
+#+end_src
+#+results:
+   [[file:img/eta-vs-rango.pdf]]
+
+    #+LABEL: fig-deltar-vs-rango
+    #+CAPTION: $\Delta R$ en función del rango $r_k$
+    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  h = 5375;
+  n_near = 18.24*pi/180;
+  c = 299792458;
+  Ts = 50e-6;
+  kmax = 20;
+  r0 = h/(cos(n_near));
+  rangos = r0:c*Ts/2:r0+kmax*c*Ts/2;
+  etas = acos(h./rangos);
+  
+  deltas = sin(etas).*rangos-shift(sin(etas).*rangos,1)
+  plot(deltas(2:end), 'linewidth', 4);
+  axis([1 length(deltas)-1])
+  set(gca, 'interpreter', 'tex');
+  set(gca, 'xtick', 1:length(deltas)-1);
+  cambiarEjeX("r_{%d}",1);
+
+  grid();
+  ans = guardarImagen("img/deltaR-vs-rango.pdf");
+#+end_src
+#+results:
+   [[file:img/deltaR-vs-rango.pdf]]
+   
 \newpage
 
 * Parte analógica
