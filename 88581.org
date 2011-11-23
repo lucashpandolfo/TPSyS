@@ -100,7 +100,8 @@
   ans = guardarImagen("img/chirp-no-modulada.pdf");
 #+end_src
 #+results:
-[[file:img/chirp-no-modulada.pdf]]
+   [[file:img/chirp-no-modulada.pdf]]
+
 
     #+LABEL: fig-chirp-no-modulada-no-nyquist
     #+CAPTION: Chirp emitida por el SARAT (no modulada) submuestreada
@@ -129,7 +130,7 @@
   ans = guardarImagen("img/chirp-no-modulada-submuestreada.pdf");
 #+end_src
 #+results:
-[[file:img/chirp-no-modulada-submuestreada.pdf]]
+   [[file:img/chirp-no-modulada-submuestreada.pdf]]
 
     #+LABEL: fig-espectro-chirp-no-modulada
     #+CAPTION: Espectro de la  Chirp emitida por el SARAT (no modulada)
@@ -137,22 +138,21 @@
 #+begin_src octave :exports results :results file
   t = 0:1/(Fs):10e-6
   chirp_nm = chirp_no_modulada(t);
-  espectro = fft(chirp_nm);
-  plot(Fs/t(end) * t,20*log10(abs(espectro)), "linewidth", 3);
-  axis([0 Fs 0 30])
+  espectro = fftshift(abs(fft(chirp_nm)));
+  plot(Fs/t(end) * t -Fs/2,20*log10(espectro), "linewidth", 3);
+  axis([-Fs/2 Fs/2 0 30])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
   ans = guardarImagen("img/espectro-chirp-no-modulada.pdf");
 #+end_src
 #+results:
-[[file:img/espectro-chirp-no-modulada.pdf]]
+   [[file:img/espectro-chirp-no-modulada.pdf]]
 
    La chirp tiene una frecuencia máxima de 20Mhz y por Nyquist la
    mínima frecuencia de muestreo que podemos usar es 40Mhz, si no se
    satisface el criterio de Nyquist se producen resultados como el de
    la figura \ref{fig-chirp-no-modulada-no-nyquist}.
-
 
 ** Ejercicio 3
 
@@ -227,9 +227,9 @@
   Fs=3000e6;
   t = 0:1/Fs:10e-6;
   chirp_nm = chirp_no_modulada(t);
-  espectroA = fft(chirp_nm);
-  plot(Fs/t(end) * t,20*log10(abs(espectroA)), "linewidth", 3);
-  axis([0 Fs])
+  espectroA = fftshift(abs(fft(chirp_nm)));
+  plot(Fs/t(end) * t - Fs/2,20*log10(espectroA), "linewidth", 3);
+  axis([-Fs/2 Fs/2])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
@@ -237,26 +237,26 @@
   subplot(512);
   exponencial = e.^(j*2*pi*200e6*t);
   producto = chirp_nm .* exponencial;
-  espectroCorrido = abs(fft(producto));
-  plot(Fs/t(end) * t, 20*log10(espectroCorrido), "linewidth", 3);
-  axis([0 Fs])
+  espectroCorrido = fftshift(abs(fft(producto)));
+  plot(Fs/t(end) * t - Fs/2, 20*log10(espectroCorrido), "linewidth", 3);
+  axis([-Fs/2 Fs/2])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
   
   subplot(513);
-  espectroReal = abs(fft(real(producto)));
-  plot(Fs/t(end) * t, 20*log10(espectroReal), "linewidth", 3);
-  axis([0 Fs])
+  espectroReal = fftshift(abs(fft(real(producto))));
+  plot(Fs/t(end) * t - Fs/2, 20*log10(espectroReal), "linewidth", 3);
+  axis([-Fs/2 Fs/2])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
   
   subplot(514);
   coseno = cos(1100e6*2*pi*t);
-  espectroCoseno = abs(fft( real(producto).*coseno ));
-  plot(Fs/t(end) * t, 20*log10(espectroCoseno), "linewidth", 3);
-  axis([0 Fs])
+  espectroCoseno = fftshift(abs(fft( real(producto).*coseno )));
+  plot(Fs/t(end) * t - Fs/2, 20*log10(espectroCoseno), "linewidth", 3);
+  axis([-Fs/2 Fs/2])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
@@ -273,8 +273,8 @@
   filtro(1,fc1:fc2) = 1;
   
   espectroFiltro = espectroCoseno.*filtro;
-  plot(Fs/t(end) * t, 20*log10(espectroFiltro), "linewidth", 3);
-  axis([0 Fs])
+  plot(Fs/t(end) * t -Fs/2, 20*log10(espectroFiltro), "linewidth", 3);
+  axis([-Fs/2 Fs/2])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
@@ -334,14 +334,16 @@
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   chirp_real = cargarChirp();
-  espectro = abs(fft(chirp_real));
-  plot(20*log10(espectro), 'linewidth', 4)
+  espectro = fftshift(abs(fft(chirp_real)));
+  plot(-length(espectro)/2+1:length(espectro)/2,20*log10(espectro), 'linewidth', 4);
+  axis([-length(espectro)/2+1 length(espectro)/2])
   cambiarEjeX("%.0fMhz",1/10);
+  cambiarEjeY("%ddB", 1);
   grid();
   ans = guardarImagen("img/chirp-real-espectro.pdf");
 #+end_src
 #+results:
-[[file:img/chirp-real-espectro.pdf]]
+   [[file:img/chirp-real-espectro.pdf]]
 
 ** Ejercicio 11
 
@@ -351,10 +353,13 @@
 #+begin_src octave :exports results :results file
   datos = cargarMatriz();
   datos_no_chirp = datos(201:end,350:end);
-  espectros = abs(fft(datos_no_chirp, [] ,2)); #fft de cada fila
-  espectro = sum(espectros,2)/rows(datos_no_chirp);
-  plot(20*log10(espectro), 'linewidth', 4)
+  espectros = fftshift(abs(fft(datos_no_chirp, [] ,2))); #fft de cada fila
+  espectro = sum(espectros,1)/rows(datos_no_chirp);
+  plot(-length(espectro)/2+1:length(espectro)/2, 20*log10(espectro), 'linewidth', 4)
 
+  axis([-length(espectro)/2+1 length(espectro)/2])
+
+  cambiarEjeX("%.0fMhz",1/10);  
   cambiarEjeY("%ddB", 1);
 
   grid();
@@ -369,19 +374,49 @@
 #+begin_src octave :exports results :results file
   datos = cargarMatriz();
   datos_no_chirp = datos(201:end,350:end);
-  espectros = abs(fft(datos_no_chirp, [] ,1)); #fft de cada columna
-  espectro = sum(espectros,1)/columns(datos_no_chirp);
-  plot(20*log10(espectro), 'linewidth', 4)
+  espectros = fftshift(abs(fft(datos_no_chirp, [] ,1))); #fft de cada columna
+  espectro = sum(espectros,2)/columns(datos_no_chirp);
+  plot(-length(espectro)/2+1:length(espectro)/2, 20*log10(espectro), 'linewidth', 4)
 
-  axis([0 length(espectro)]);
+  axis([-length(espectro)/2+1 length(espectro)/2])
 
+  cambiarEjeX("%.0fMhz",1/10);  
   cambiarEjeY("%ddB", 1);
 
+  cambiarEjeY("%ddB", 1);
+  
   grid();
   ans = guardarImagen("img/espectro-azimuth.pdf");
 #+end_src
 #+results:
    [[file:img/espectro-azimuth.pdf]]
+
+** Ejercicio 12
+
+   #+LABEL: fig-modulo-espectro-azimuth-medio-prf
+   #+CAPTION: Modulo del espectro en azimuth (medio del PRF)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  datos = cargarMatriz();
+  datos_no_chirp = datos(201:end,350:end);
+  datos_no_chirp = datos_no_chirp(1:2:end,:);
+  espectros = fftshift(abs(fft(datos_no_chirp, [] ,1))); #fft de cada columna
+  espectro = sum(espectros,2)/columns(datos_no_chirp);
+  plot(-length(espectro)/2+1:length(espectro)/2, 20*log10(espectro), 'linewidth', 4)
+  
+  axis([-length(espectro)/2+1 length(espectro)/2])
+  
+  cambiarEjeX("%.0fMhz",1/10);  
+  cambiarEjeY("%ddB", 1);
+  
+  cambiarEjeY("%ddB", 1);
+  
+  grid();
+  ans = guardarImagen("img/espectro-azimuth-medio-prf.pdf");
+#+end_src
+#+results:
+   [[file:img/espectro-azimuth-medio-prf.pdf]]
+
 
 \newpage
 * Compresión del pulso
@@ -396,10 +431,11 @@
     {\mathcal F}| x[n] \star y[n]|(\Omega) &=& \sum_{n=-\infty}^{\infty} x[n] \star y[n] e^{-j\Omega n} \\
     &=& \sum_{n=-\infty}^{\infty} \sum_{k=-\infty}^{\infty} x[k] y^*[k-n] e^{-j\Omega n} \\
     &=& \sum_{k=-\infty}^{\infty} x[k] \sum_{n=-\infty}^{\infty} y^*[k-n] e^{-j\Omega n} \\
-    &=& \sum_{k=-\infty}^{\infty} x[k] Y^*(\Omega) e^{j\Omega k} \\
-    &=& \sum_{k=-\infty}^{\infty} x[k]  e^{j\Omega k}  Y^*(\Omega) \\
-    &=& X(-\Omega)  Y^*(\Omega)
+    &=& \sum_{k=-\infty}^{\infty} x[k] Y^*(\Omega) e^{-j\Omega k} \\
+    &=& \sum_{k=-\infty}^{\infty} x[k]  e^{-j\Omega k}  Y^*(\Omega) \\
+    &=& X(\Omega)  Y^*(\Omega)
   \end{eqnarray*}
+  
 #+END_LATEX
 
 *** TODO explicar la relación con la convolución. Contraejemplo de conmutatividad
@@ -413,14 +449,43 @@
 #+begin_src octave :exports results :results file
   chirp = cargarChirp();
   grid();
-  ans = guardarImagen("img/espectro-azimuth.pdf");
+  fft_chirp = fftshift(fft(chirp,length(chirp)*3));
+  correlacion = ifft(fft_chirp .* conj(fft_chirp));
+  correlacion = [correlacion correlacion];
+  plot(-length(correlacion)/2+1:length(correlacion)/2, abs(correlacion),'linewidth', 4);
+  cambiarEjeX("¿%0.0f?",1);
+  ans = guardarImagen("img/simulacion-autocorrelacion.pdf");
 #+end_src
 #+results:
-   [[file:img/espectro-azimuth.pdf]]
-
+   [[file:img/simulacion-autocorrelacion.pdf]]
 
 \newpage   
 * Compresión en rango
+** Ejercicio 17
+   #+LABEL: fig-compresion-en-rango
+   #+CAPTION: Compresion en rango
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  chirp = cargarChirp();
+  datos = cargarMatriz();
+  datos_no_chirp = datos(201:end,350:end);
+  
+  grid();
+  fft_chirp = conj(fftshift(fft(chirp,1999)));
+  
+  fft_datos = fftshift(fft(datos,[],2));
+  
+  for i = 1:rows(fft_datos)
+    compresion(i,:) = ifft(fft_chirp .* fft_datos(i,:));
+  end
+  
+  imagesc(abs(compresion),'linewidth', 4);
+  
+  ans = guardarImagen("img/simulacion-autocorrelacion.pdf");
+#+end_src
+#+results:
+   [[file:img/compresion-en-rango.pdf]]
+
 \newpage
 * Compresión en azimuth
 \newpage
