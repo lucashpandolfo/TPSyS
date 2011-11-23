@@ -254,12 +254,12 @@
 
     #+LABEL: fig-comparacion-ventanas
     #+CAPTION: Comparación de diferentes tipos de ventanas
-    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   t = 0:1/(Fs):10e-6*10;
   chirp_nm = real(chirp_no_modulada(t))
   longitud = 100;
-  inicio = 20;
+  inicio = 1;
   chirp_window = chirp_nm(inicio:inicio+longitud-1);
   ventanas{1} = {rectwin(longitud), "Rectangular"};
   ventanas{2} = {tukeywin(longitud), "Tukey"};
@@ -272,18 +272,18 @@
     plot(ventanas{i}{1}, 'linewidth', 3);
     title(ventanas{i}{2});
     subplot(max,2,2*i)
-    plot(abs(fftshift(fft(ventanas{i}{1}.'.*chirp_window))),'linewidth', 3);
-  #  title(ventanas{i}{2});
+    plot((-longitud/2+1:longitud/2) ,abs(fftshift(fft(ventanas{i}{1}.'.*chirp_window))),'linewidth', 3);
+    cambiarEjeX("%0.0fMhz",Fs*2/longitud * 1e-6);
+    grid();
   end
-  
   ans = guardarImagen("img/comparacion-ventanas.pdf");
 #+end_src
 #+results:
-   [[file:img/comparacion-ventanas.pdf]]
+[[file:img/comparacion-ventanas.pdf]]
 
     #+LABEL: fig-comparacion-ventanas2
     #+CAPTION: Comparación de diferentes tipos de ventanas (espectrogramas)
-    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   t = 0:1/(Fs):10e-6*10;
   chirp_nm = real(chirp_no_modulada(t))
