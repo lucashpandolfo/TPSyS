@@ -352,68 +352,52 @@
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   
+  MPM = 2; 
+  
   subplot(511);
-  Fs=3000e6;
-  t = 0:1/Fs:10e-6;
-  chirp_nm = chirp_no_modulada(t);
-  espectroA = fftshift(abs(fft(chirp_nm)));
-  plot(Fs/t(end) * t - Fs/2,20*log10(espectroA), "linewidth", 3);
-  axis([-Fs/2 Fs/2])
-  cambiarEjeX("%0.0fMhz", 1/1e6);
-  cambiarEjeY("%ddB", 1);
+  original = [zeros(1,10*MPM) bartlett(50*MPM).' zeros(1,10*MPM)];
+  plot(-length(original)/2+1:length(original)/2, original, 'linewidth', 4);
+  axis([-length(original)/2+1 length(original)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
   
   subplot(512);
-  exponencial = e.^(j*2*pi*200e6*t);
-  producto = chirp_nm .* exponencial;
-  espectroCorrido = fftshift(abs(fft(producto)));
-  plot(Fs/t(end) * t - Fs/2, 20*log10(espectroCorrido), "linewidth", 3);
-  axis([-Fs/2 Fs/2])
-  cambiarEjeX("%0.0fMhz", 1/1e6);
-  cambiarEjeY("%ddB", 1);
+  desplazado = [zeros(1,(175+50+20)*MPM) zeros(1,175*MPM) bartlett(50*MPM).' zeros(1,20*MPM)];
+  plot(-length(desplazado)/2+1:length(desplazado)/2, desplazado, 'linewidth', 4);
+  axis([-length(desplazado)/2+1 length(desplazado)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
   
   subplot(513);
-  espectroReal = fftshift(abs(fft(real(producto))));
-  plot(Fs/t(end) * t - Fs/2, 20*log10(espectroReal), "linewidth", 3);
-  axis([-Fs/2 Fs/2])
-  cambiarEjeX("%0.0fMhz", 1/1e6);
-  cambiarEjeY("%ddB", 1);
+  parteReal = [zeros(1,20*MPM) bartlett(50*MPM).' zeros(1,175*MPM) zeros(1,175*MPM) bartlett(50*MPM).' zeros(1,20*MPM)];
+  plot(-length(parteReal)/2+1:length(parteReal)/2, parteReal, 'linewidth', 4);
+  axis([-length(parteReal)/2+1 length(parteReal)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
+  
   
   subplot(514);
-  coseno = cos(1100e6*2*pi*t);
-  espectroCoseno = fftshift(abs(fft( real(producto).*coseno )));
-  plot(Fs/t(end) * t - Fs/2, 20*log10(espectroCoseno), "linewidth", 3);
-  axis([-Fs/2 Fs/2])
-  cambiarEjeX("%0.0fMhz", 1/1e6);
-  cambiarEjeY("%ddB", 1);
+  redesplazado = [zeros(1,1100*MPM - length(parteReal)/2) parteReal];
+  redesplazado = [redesplazado(end:-1:1) redesplazado]
+  plot(-length(redesplazado)/2+1:length(redesplazado)/2, redesplazado, 'linewidth', 4);
+  axis([-length(redesplazado)/2+1 length(redesplazado)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
   
-  %filtro ideal
   subplot(515);
-  filtro = zeros(1,length(t));
-  fc1 = ceil((1300e6-30e6)*t(end));
-  fc2 = ceil((1300e6+30e6)*t(end));
-  filtro(1,fc1:fc2) = 1;
-  
-  fc1 = ceil((1700e6-30e6)*t(end));
-  fc2 = ceil((1700e6+30e6)*t(end));
-  filtro(1,fc1:fc2) = 1;
-  
-  espectroFiltro = espectroCoseno.*filtro;
-  plot(Fs/t(end) * t -Fs/2, 20*log10(espectroFiltro), "linewidth", 3);
-  axis([-Fs/2 Fs/2])
-  cambiarEjeX("%0.0fMhz", 1/1e6);
-  cambiarEjeY("%ddB", 1);
+  filtro = ones(1,length(redesplazado));
+  filtro(80*MPM:end-80*MPM)=0;
+  filtrado = redesplazado .* filtro;
+  plot(-length(filtrado)/2+1:length(filtrado)/2, filtrado, 'linewidth', 4);
+  axis([-length(filtrado)/2+1 length(filtrado)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
+  
   
   ans = guardarImagen("img/espectros-modulador-ideal.pdf");
 #+end_src
 #+results:
    [[file:img/espectros-modulador-ideal.pdf]]
-
-*** TODO atenuación (después de verificar que las cosas sean potables)
 
 \newpage
 * Parte digital
