@@ -470,18 +470,22 @@
   datos = cargarMatriz();
   datos_no_chirp = datos(201:end,350:end);
   
-  grid();
-  fft_chirp = conj(fftshift(fft(chirp,1999)));
+  factor = 1;
   
-  fft_datos = fftshift(fft(datos,[],2));
+  fft_chirp = fft(chirp,columns(datos_no_chirp)*factor);
   
+  fft_datos = conj(fft(datos_no_chirp,columns(datos_no_chirp)*factor,2));
+  
+  clear compresion;
+  tic
   for i = 1:rows(fft_datos)
     compresion(i,:) = ifft(fft_chirp .* fft_datos(i,:));
   end
+  toc
   
-  imagesc(abs(compresion),'linewidth', 4);
+  imagesc(20*log10(abs(compresion)));
   
-  ans = guardarImagen("img/simulacion-autocorrelacion.pdf");
+  ans = guardarImagen("img/compresion-en-rango.pdf");
 #+end_src
 #+results:
    [[file:img/compresion-en-rango.pdf]]
