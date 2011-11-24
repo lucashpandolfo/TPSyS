@@ -483,7 +483,20 @@
 #+results:
    [[file:img/datos-crudos.pdf]]
 
-*** TODO cálculos
+   Podemos ver en la figura \ref{fig-datos-crudos}, que la ventana de
+   recepción (ancho total de la imagen) dura 9000 muestras y que en
+   cada línea (exceptuando las primeras 200) hay una región muy oscura
+   al inicio de aproximadamente 350 muestras. Las primeras 200 lineas
+   contienen solamente un muestreo de la chirp emitida por el
+   SARAT. La duración de esta chirp es de 500 muestras o $10\mu
+   s$. Entonces conociendo esta equivalencia entre cantidad de
+   muestras y tiempo, podemos calcular que la ventana de adquisición
+   dura $180 \mu s$. Si hacemos el cálculo teórico vemos que,
+   primero, estamos tomando muestras a 50Mhz y que la cantidad de
+   muestras horizontales es de 9000, entonces $\frac{9000}{50\,\,
+   10^6} = 180\,\,10^{-6}$, y segundo para el rango $r_0 = 5659m$ y
+   considerando que las ondas viajan a la velocidad de la luz y deben
+   viajar de ida y vuelta, la onda tarda en viajar unos $37.75\mu s$.
 
 ** Ejercicio 10
 
