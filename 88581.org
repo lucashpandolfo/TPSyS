@@ -348,7 +348,7 @@
 ** Ejercicio 5
 
    #+LABEL: fig-espectros-modulador-ideal
-   #+CAPTION: Espectro de las señales en las diferentes fases del modulador (ideal)
+   #+CAPTION: Espectro de las señales en las diferentes fases del modulador
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   
@@ -398,6 +398,75 @@
 #+end_src
 #+results:
    [[file:img/espectros-modulador-ideal.pdf]]
+
+** Ejercicio 6
+
+   #+LABEL: fig-espectros-modulador-ideal
+   #+CAPTION: Espectro de las señales en las diferentes fases del demodulador
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  MPM = 2; 
+
+
+  subplot(511);
+  entrada = triangulo(40,1300,3000,MPM) .+ triangulo(40,-1300,3000,MPM);
+  plot(-length(entrada)/2+1:length(entrada)/2,entrada, 'linewidth', 4);
+  cambiarEjeX("%0.0fMhz", 1/MPM);
+  grid();  
+  
+  subplot(512);
+  por_coseno = triangulo(40,2400,5000,MPM) + triangulo(40,200,5000,MPM) + triangulo(40,-2400,5000,MPM) + triangulo(40,-200,5000,MPM);
+  plot(-length(por_coseno)/2+1:length(por_coseno)/2,por_coseno, 'linewidth', 4);
+  axis([-length(por_coseno)/2+1 length(por_coseno)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
+  grid();  
+  
+  subplot(513);
+  filtrado = triangulo(40,200,480,MPM) + triangulo(40,-200,480,MPM);
+  plot(-length(filtrado)/2+1:length(filtrado)/2,filtrado, 'linewidth', 4);
+  axis([-length(filtrado)/2+1 length(filtrado)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
+  grid();  
+  
+  subplot(514);
+  por_coseno2 = 2*triangulo(40,0,880,MPM) + triangulo(40,-400,880,MPM) + triangulo(40,400,880,MPM);
+  plot(-length(por_coseno2)/2+1:length(por_coseno2)/2,por_coseno2, 'linewidth', 4);
+  axis([-length(por_coseno2)/2+1 length(por_coseno2)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
+  grid();  
+  
+  subplot(515);
+  ultimo = 2*triangulo(40,0,80,MPM);
+  plot(-length(ultimo)/2+1:length(ultimo)/2,ultimo, 'linewidth', 4);
+  axis([-length(ultimo)/2+1 length(ultimo)/2])
+  cambiarEjeX("%0.0fMhz", 1/MPM);
+  grid();  
+  
+  ans = guardarImagen("img/espectros-demodulador-ideal.pdf");
+#+end_src
+#+results:
+   [[file:img/espectros-demodulador-ideal.pdf]]
+
+** Ejercicio 7
+   Las señales $I(t)$ y $Q(t)$, no son mas que las pertes real e
+   imaginaria de la chirp emitida por el SARAT. El modulador lo que
+   hace es desplazar el espectro de la chirp hasta los 1300Mhz (la
+   modula) y luego la emite. Esta señal es reflejada por el suelo y
+   vuelve al radar. Como estamos considerando que la señal al viajar
+   hasta el suelo, rebotar y volver está pasando por un sistema LTI
+   que solo introduce un retardo o un cambio de fase, la señal que
+   recibe el radar es la misma que emitió, solo que con algún cambio
+   de fase. Luego se pasa la señal a una banda intermedia de 200Mhz y
+   por último es multiplicada por un coseno de 200Mhz en el caso de
+   $I(t)$ o pos un seno de la misma frecuencia para el caso de $Q(t)$.
+
+*** TODO redondeamelo
+
+** Ejercicio 8
+  Tanto el modulador como el demodulador son sistemas LTI. Como
+  consideramos el mundo fuera del SARAT como un sistema LTI, entonces
+  todo el sistema en su totalidad es LTI.
+
 
 \newpage
 * Parte digital
