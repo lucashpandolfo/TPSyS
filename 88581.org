@@ -475,10 +475,20 @@
    #+CAPTION: Datos crudos del SARAT (subset)
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  datos = cargarMatriz();
   colormap('gray');
-  imagesc(20*log10(abs(datos)));
+  
+  datos = cargarMatriz();
+  
+  tic;
+    datos = 20*log10(abs(datos));
+  toc;
+  
+  figure(1, 'visible', 'off');
+    imagesc(datos);
+  tic
+  
   ans = guardarImagen("img/datos-crudos.pdf");
+  toc
 #+end_src
 #+results:
    [[file:img/datos-crudos.pdf]]
@@ -500,9 +510,25 @@
 
 ** Ejercicio 10
 
+   #+LABEL: fig-chirp-real-espectro
+   #+CAPTION: Chirp real del SARAT (espectro)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  chirp_real = cargarChirp();
+  espectro = fftshift(abs(fft(chirp_real)));
+  plot(-length(espectro)/2+1:length(espectro)/2,20*log10(espectro), 'linewidth', 4);
+  axis([-length(espectro)/2+1 length(espectro)/2])
+  cambiarEjeX("%.0fMhz",1/10);
+  cambiarEjeY("%ddB", 1);
+  grid();
+  ans = guardarImagen("img/chirp-real-espectro.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-real-espectro.pdf]]
+
    #+LABEL: fig-chirp-real
    #+CAPTION: Chirp real del SARAT
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+   #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   datos = cargarMatriz();
   subplot(311);
@@ -524,39 +550,23 @@
 #+results:
    [[file:img/chirp-real.pdf]]
 
-   #+LABEL: fig-chirp-real-espectro
-   #+CAPTION: Chirp real del SARAT (espectro)
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
-#+begin_src octave :exports results :results file
-  chirp_real = cargarChirp();
-  espectro = fftshift(abs(fft(chirp_real)));
-  plot(-length(espectro)/2+1:length(espectro)/2,20*log10(espectro), 'linewidth', 4);
-  axis([-length(espectro)/2+1 length(espectro)/2])
-  cambiarEjeX("%.0fMhz",1/10);
-  cambiarEjeY("%ddB", 1);
-  grid();
-  ans = guardarImagen("img/chirp-real-espectro.pdf");
-#+end_src
-#+results:
-   [[file:img/chirp-real-espectro.pdf]]
-
 ** Ejercicio 11
 
    #+LABEL: fig-modulo-espectro-rango
    #+CAPTION: Modulo del espectro en rango
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  datos = cargarMatriz();
-  datos_no_chirp = datos(201:end,350:end);
+  datos_no_chirp = cargarMatrizCompleta();
+  datos_no_chirp = datos_no_chirp(201:end,350:end);
   espectros = fftshift(abs(fft(datos_no_chirp, [] ,2))); #fft de cada fila
   espectro = sum(espectros,1)/rows(datos_no_chirp);
   plot(-length(espectro)/2+1:length(espectro)/2, 20*log10(espectro), 'linewidth', 4)
-
+  
   axis([-length(espectro)/2+1 length(espectro)/2])
-
-  cambiarEjeX("%.0fMhz",1/10);  
+  
   cambiarEjeY("%ddB", 1);
-
+  cambiarEjeX("%0.0fMhz", (Fs/2)/(length(espectro)/2) * 1e-6);
+  
   grid();
   ans = guardarImagen("img/espectro-rango.pdf");
 #+end_src
@@ -567,18 +577,15 @@
    #+CAPTION: Modulo del espectro en azimuth
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  datos = cargarMatriz();
-  datos_no_chirp = datos(201:end,350:end);
+  datos_no_chirp = cargarMatrizCompleta();
+  datos_no_chirp = datos_no_chirp(201:end,350:end);
   espectros = fftshift(abs(fft(datos_no_chirp, [] ,1))); #fft de cada columna
   espectro = sum(espectros,2)/columns(datos_no_chirp);
   plot(-length(espectro)/2+1:length(espectro)/2, 20*log10(espectro), 'linewidth', 4)
 
   axis([-length(espectro)/2+1 length(espectro)/2])
-
-  cambiarEjeX("%.0fMhz",1/10);  
   cambiarEjeY("%ddB", 1);
-
-  cambiarEjeY("%ddB", 1);
+  cambiarEjeX("%0.0fHz", (PRF/2)/(length(espectro)/2));
   
   grid();
   ans = guardarImagen("img/espectro-azimuth.pdf");
@@ -589,11 +596,11 @@
 ** Ejercicio 12
 
    #+LABEL: fig-modulo-espectro-azimuth-medio-prf
-   #+CAPTION: Modulo del espectro en azimuth (medio del PRF)
+   #+CAPTION: Modulo del espectro en azimuth (medio PRF)
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
-  datos = cargarMatriz();
-  datos_no_chirp = datos(201:end,350:end);
+  datos_no_chirp = cargarMatrizCompleta();
+  datos_no_chirp = datos_no_chirp(201:end,350:end);
   datos_no_chirp = datos_no_chirp(1:2:end,:);
   espectros = fftshift(abs(fft(datos_no_chirp, [] ,1))); #fft de cada columna
   espectro = sum(espectros,2)/columns(datos_no_chirp);
@@ -601,10 +608,8 @@
   
   axis([-length(espectro)/2+1 length(espectro)/2])
   
-  cambiarEjeX("%.0fMhz",1/10);  
   cambiarEjeY("%ddB", 1);
-  
-  cambiarEjeY("%ddB", 1);
+  cambiarEjeX("%0.0fHz", (PRF/4)/(length(espectro)/2));
   
   grid();
   ans = guardarImagen("img/espectro-azimuth-medio-prf.pdf");

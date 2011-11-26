@@ -1,5 +1,6 @@
 # -*- mode: Octave; -*-
 Fs=50e6;
+PRF=250;
 
 function [] = cambiarEjeX(string, escala)
   xt = get(gca,'XTick');
@@ -22,6 +23,11 @@ function [salida] = guardarImagen(nombre)
   salida = nombre;
 end
 
+function [salida] = guardarImagenjpg(nombre)
+  print(nombre, '-djpg');
+  salida = nombre;
+end
+
 function [salida] = chirp_no_modulada(t)
   k2=-20e6;
   k1=2e12;
@@ -30,6 +36,10 @@ end
 
 function [datos] = cargarMatriz()
   datos = load('/home/lucas/Octave/TPSyS/data/SAR_data_subset.mat').data;
+end
+
+function [datos] = cargarMatrizCompleta()
+  datos = load('/home/lucas/Octave/TPSyS/data/SAR_data.mat').data;
 end
   
 function [datos] = cargarChirp()
