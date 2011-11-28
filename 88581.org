@@ -199,8 +199,8 @@
   t = 0:1/(Fs):10e-6
   chirp_nm = chirp_no_modulada(t);
   espectro = fftshift(abs(fft(chirp_nm)));
-  plot(Fs/t(end) * t -Fs/2,20*log10(espectro), "linewidth", 3);
-  axis([-Fs/2 Fs/2 0 30])
+  plot(Fs/t(end) * t -Fs/2,10*log10(espectro), "linewidth", 3);
+  axis([-Fs/2 Fs/2 0 15])
   cambiarEjeX("%0.0fMhz", 1/1e6);
   cambiarEjeY("%ddB", 1);
   grid();
@@ -458,7 +458,7 @@
    recibe el radar es la misma que emitió, solo que con algún cambio
    de fase. Luego se pasa la señal a una banda intermedia de 200Mhz y
    por último es multiplicada por un coseno de 200Mhz en el caso de
-   $I(t)$ o pos un seno de la misma frecuencia para el caso de $Q(t)$.
+   $I(t)$ o por un seno de la misma frecuencia para el caso de $Q(t)$.
 
 *** TODO redondeamelo
 
@@ -480,7 +480,7 @@
   datos = cargarMatriz();
   
   tic;
-    datos = 20*log10(abs(datos));
+    datos = 10*log10(abs(datos));
   toc;
   
   figure(1, 'visible', 'off');
@@ -516,7 +516,7 @@
 #+begin_src octave :exports results :results file
   chirp_real = cargarChirp();
   espectro = fftshift(abs(fft(chirp_real)));
-  plot(-length(espectro)/2+1:length(espectro)/2,20*log10(espectro), 'linewidth', 4);
+  plot(-length(espectro)/2+1:length(espectro)/2,10*log10(espectro), 'linewidth', 4);
   axis([-length(espectro)/2+1 length(espectro)/2])
   cambiarEjeX("%.0fMhz",1/10);
   cambiarEjeY("%ddB", 1);
@@ -525,6 +525,22 @@
 #+end_src
 #+results:
    [[file:img/chirp-real-espectro.pdf]]
+
+   #+LABEL: fig-chirp-real-espectro-ancho-banda
+   #+CAPTION: Chirp real del SARAT (ancho de banda)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  chirp_real = cargarChirp();
+  espectro = fftshift(abs(fft(chirp_real)));
+  plot(-length(espectro)/2+1:length(espectro)/2,10*log10(espectro), 'linewidth', 4);
+  axis([-length(espectro)/2+1 length(espectro)/2])
+  cambiarEjeX("%.0fMhz",1/10);
+  cambiarEjeY("%ddB", 1);
+  grid();
+  ans = guardarImagen("img/chirp-real-ancho-banda.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-real-ancho-banda.pdf]]
 
    #+LABEL: fig-chirp-real
    #+CAPTION: Chirp real del SARAT
@@ -560,7 +576,7 @@
   datos_no_chirp = datos_no_chirp(201:end,350:end);
   espectros = fftshift(abs(fft(datos_no_chirp, [] ,2))); #fft de cada fila
   espectro = sum(espectros,1)/rows(datos_no_chirp);
-  plot(-length(espectro)/2+1:length(espectro)/2, 20*log10(espectro), 'linewidth', 4)
+  plot(-length(espectro)/2+1:length(espectro)/2, 10*log10(espectro), 'linewidth', 4)
   
   axis([-length(espectro)/2+1 length(espectro)/2])
   
@@ -581,7 +597,7 @@
   datos_no_chirp = datos_no_chirp(201:end,350:end);
   espectros = fftshift(abs(fft(datos_no_chirp, [] ,1))); #fft de cada columna
   espectro = sum(espectros,2)/columns(datos_no_chirp);
-  plot(-length(espectro)/2+1:length(espectro)/2, 20*log10(espectro), 'linewidth', 4)
+  plot(-length(espectro)/2+1:length(espectro)/2, 10*log10(espectro), 'linewidth', 4)
 
   axis([-length(espectro)/2+1 length(espectro)/2])
   cambiarEjeY("%ddB", 1);
@@ -604,7 +620,7 @@
   datos_no_chirp = datos_no_chirp(1:2:end,:);
   espectros = fftshift(abs(fft(datos_no_chirp, [] ,1))); #fft de cada columna
   espectro = sum(espectros,2)/columns(datos_no_chirp);
-  plot(-length(espectro)/2+1:length(espectro)/2, 20*log10(espectro), 'linewidth', 4)
+  plot(-length(espectro)/2+1:length(espectro)/2, 10*log10(espectro), 'linewidth', 4)
   
   axis([-length(espectro)/2+1 length(espectro)/2])
   
@@ -622,7 +638,6 @@
 * Compresión del pulso
 ** Ejercicio 13
 
-   
    La correlación no es una operación conmutativa. La relación entre
    la correlación de dos funciones con su transformada de Fourier es
    la siguiente:
@@ -631,15 +646,31 @@
     {\mathcal F}| x[n] \star y[n]|(\Omega) &=& \sum_{n=-\infty}^{\infty} x[n] \star y[n] e^{-j\Omega n} \\
     &=& \sum_{n=-\infty}^{\infty} \sum_{k=-\infty}^{\infty} x[k] y^*[k-n] e^{-j\Omega n} \\
     &=& \sum_{k=-\infty}^{\infty} x[k] \sum_{n=-\infty}^{\infty} y^*[k-n] e^{-j\Omega n} \\
-    &=& \sum_{k=-\infty}^{\infty} x[k] Y^*(\Omega) e^{-j\Omega k} \\
-    &=& \sum_{k=-\infty}^{\infty} x[k]  e^{-j\Omega k}  Y^*(\Omega) \\
-    &=& X(\Omega)  Y^*(\Omega)
+    &=& \sum_{k=-\infty}^{\infty} x[k] \sum_{l=-\infty}^{\infty} y^*[l] e^{-j\Omega (k-l)} \\
+    &=& \sum_{k=-\infty}^{\infty} x[k] e^{-j\Omega k} \sum_{l=-\infty}^{\infty} y^*[l] e^{j\Omega l} \\
+    &=& X(\Omega) \left(\sum_{l=-\infty}^{\infty} y[l] e^{-j\Omega l}\right)^* \\
+    &=& X(\Omega) \left(Y(\Omega)\right)^* \\
+    &=& X(\Omega) Y^*(\Omega) \\
   \end{eqnarray*}
   
 #+END_LATEX
 
-*** TODO explicar la relación con la convolución. Contraejemplo de conmutatividad
+   Entonces, por ejemplo si tenemos una $X(\Omega)$ real y una
+   $Y(\Omega)$ imaginaria, no es lo mismo 
+   $$x[n] \star y[n] = X(\Omega) Y^*(\Omega) = X(\Omega) (-1)Y(\Omega)$$
+   que
+   $$y[n] \star x[n] = Y(\Omega) X^*(\Omega) = Y(\Omega) X(\Omega)$$
 
+
+   No obstante, si lo que nos interesa es el módulo de la
+   transformada, es decir 
+
+   $$\big| {\mathcal F}| x[n] \star y[n]|(\Omega) \big|$$
+
+   se puede ver a simple vista que la operación es conmutativa, puesto
+   que
+   
+   $$|X(\Omega) Y^*(\Omega)| = |X^*(\Omega) Y(\Omega)|$$
 
 ** Ejercicio 14
 
@@ -649,10 +680,10 @@
 #+begin_src octave :exports results :results file
   chirp = cargarChirp();
   grid();
-  fft_chirp = fftshift(fft(chirp,length(chirp)*3));
+  fft_chirp = fftshift(fft(chirp,length(chirp)*2));
   correlacion = ifft(fft_chirp .* conj(fft_chirp));
   correlacion = [correlacion correlacion];
-  plot(-length(correlacion)/2+1:length(correlacion)/2, abs(correlacion),'linewidth', 4);
+  plot(-length(correlacion)/2+1:length(correlacion)/2, abs(correlacion),'linewidth', 2);
   cambiarEjeX("¿%0.0f?",1);
   ans = guardarImagen("img/simulacion-autocorrelacion.pdf");
 #+end_src
@@ -670,20 +701,23 @@
   datos = cargarMatriz();
   datos_no_chirp = datos(201:end,350:end);
   
-  factor = 1;
+  factor = 2;
   
-  fft_chirp = fft(chirp,columns(datos_no_chirp)*factor);
+  tic
+  fft_chirp = conj(fft(chirp,columns(datos_no_chirp)*factor));
   
-  fft_datos = conj(fft(datos_no_chirp,columns(datos_no_chirp)*factor,2));
+  fft_datos = fft(datos_no_chirp,columns(datos_no_chirp)*factor,2);
+  toc
   
   clear compresion;
+  
   tic
   for i = 1:rows(fft_datos)
     compresion(i,:) = ifft(fft_chirp .* fft_datos(i,:));
   end
   toc
   
-  imagesc(20*log10(abs(compresion)));
+  imagesc(10*log10(abs(compresion)));
   
   ans = guardarImagen("img/compresion-en-rango.pdf");
 #+end_src
