@@ -34,6 +34,13 @@ function [salida] = chirp_no_modulada(t)
   salida = e.^(j*(2*pi*(k1*t.^2+k2*t)));
 end
 
+function[salida] = mi_chirp(fc1, fc2, bw, duracion,t)
+  k2 = fc1;
+  k1 = (fc2 - k2)/(2*duracion);
+  salida = e.^(j*(2*pi*(k1*t.^2+k2*t)));
+end
+
+
 function [datos] = cargarMatriz()
   datos = load('/home/lucas/Octave/TPSyS/data/SAR_data_subset.mat').data;
 end

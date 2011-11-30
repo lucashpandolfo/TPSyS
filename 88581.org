@@ -1,5 +1,6 @@
 #+LATEX_HEADER: \pagestyle{fancy}
-#+LATEX_HEADER: \setlength{\parskip}{0.3cm}
+#+LATEX_HEADER: \setlength{\parskip}{0}
+#+LATEX_HEADER: \parindent=0
 #+TITLE: 
 #+OPTIONS:  toc:nil
 #+LATEX_HEADER: \lhead{\includegraphics[width=1.5cm]{img/Logo-fiuba}} \chead{66.74  - Señales y Sistemas} \rhead{\Huge FIUBA}
@@ -680,11 +681,11 @@
 #+begin_src octave :exports results :results file
   chirp = cargarChirp();
   grid();
-  fft_chirp = fftshift(fft(chirp,length(chirp)*2));
+  fft_chirp = fft(chirp,length(chirp)*2);
   correlacion = ifft(fft_chirp .* conj(fft_chirp));
-  correlacion = [correlacion correlacion];
-  plot(-length(correlacion)/2+1:length(correlacion)/2, abs(correlacion),'linewidth', 2);
-  cambiarEjeX("¿%0.0f?",1);
+  #correlacion = [correlacion correlacion];
+  plot(-length(correlacion)/2+1:length(correlacion)/2, fftshift(abs(correlacion)),'linewidth', 2);
+  cambiarEjeX("%0.0fus",1/100);
   ans = guardarImagen("img/simulacion-autocorrelacion.pdf");
 #+end_src
 #+results:
@@ -697,34 +698,395 @@
    #+CAPTION: Compresion en rango
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
+  tic
   chirp = cargarChirp();
   datos = cargarMatriz();
-  datos_no_chirp = datos(201:end,350:end);
+  datos_no_chirp = datos(201:end,:);
   
   factor = 2;
   
-  tic
-  fft_chirp = conj(fft(chirp,columns(datos_no_chirp)*factor));
+   # tic
+   # fft_chirp = conj(fft(chirp,columns(datos_no_chirp)*factor));
+   # fft_datos = fft(datos_no_chirp,columns(datos_no_chirp)*factor,2);
+   # toc
   
-  fft_datos = fft(datos_no_chirp,columns(datos_no_chirp)*factor,2);
+   # clear compresion;
+   # tic
+   # for i = 1:rows(fft_datos)
+   #   fft_datos(i,:) = ifft(fft_chirp .* fft_datos(i,:));
+   # end
+   # toc
+  
+  
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+   %fft_chirp_t = fft_chirp .';
+  
+  tic
+  datos_no_chirp_t = datos_no_chirp.';
   toc
   
-  clear compresion;
+  longitud = rows(datos_no_chirp_t) + length(chirp) -1;
   
   tic
-  for i = 1:rows(fft_datos)
-    compresion(i,:) = ifft(fft_chirp .* fft_datos(i,:));
+  fft_chirp_t = conj(fft(chirp,longitud)) .';
+  fft_datos_t = fft(datos_no_chirp_t,longitud,1);
+  toc
+  
+  tic
+  for i = 1:columns(fft_datos_t)
+    fft_datos_t(:,i) = ifft(fft_chirp_t .* fft_datos_t(:,i));
   end
   toc
   
-  imagesc(10*log10(abs(compresion)));
+  colormap('gray');
+  fft_datos_t = fft_datos_t.';
   
-  ans = guardarImagen("img/compresion-en-rango.pdf");
+  save("-mat", "data/comprimida-en-rango.mat", "fft_datos_t");
+  
+  figure(1, 'visible' , 'off');
+  
+  tic
+  imagesc(10*log10(abs(fft_datos_t)));
+  toc
+  
+  tic
+  ans = guardarImagenjpg("img/compresion-en-rango.jpg");
+  toc
+  
+  toc
 #+end_src
 #+results:
-   [[file:img/compresion-en-rango.pdf]]
+   [[file:img/compresion-en-rango.jpg]]
 
 \newpage
 * Compresión en azimuth
-\newpage
+** Opcional 1
+
+   #+LABEL: fig-longitud-chirp-vs-angulo
+   #+CAPTION: Datos crudos del SARAT (subset)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  v_plat = 108;  #108 m/s
+  
+  w_footprint = 6.16*pi/180; #6.16°
+  
+  n_near = 18.24*pi/180; #18.24°
+  
+  c = 299792458; #m/s
+  
+  h = 5375; #m
+  
+  Ts = 1/50e+6;
+  
+  k=0:2500;
+  
+  y_rango0 = h / cos(n_near);
+  
+  y_rango = y_rango0 + k .* (c * Ts) ./2
+  
+  ancho_f = 2* y_rango .* tan(w_footprint/2);
+  
+  t_chirp = ancho_f / v_plat;
+  
+  plot(acos((h./y_rango))*180/pi,t_chirp, 'linewidth', 3);
+  axis([15 70])
+  grid();
+  
+  save("-mat", "data/duraciones.mat", "t_chirp");
+  
+  cambiarEjeX("%d^o",1);
+  cambiarEjeY("%ds", 1);
+  
+  ans = guardarImagen("img/longitud-chirp-vs-angulo.pdf");
+  
+#+end_src
+#+results:
+[[file:img/longitud-chirp-vs-angulo.pdf]]
+
+** Ejercicio 18
+
+   #+LABEL: fig-frecuencias-corte
+   #+CAPTION: Frecuencias de corte en azimuth y ancho de banda
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  PRF = 250;
+  
+  en_rango = load("data/comprimida-en-rango.mat").fft_datos_t;
+  ancho_total = columns(en_rango);
+  alto_total = rows(en_rango);
+    
+  transformadas = 10*log10(abs(fftshift(fft(en_rango,[],1),1)));
+  
+  n=128;
+  tam = rows(transformadas);
+  filtro = rectwin(n) / n;
+  filtro = bartlett(n) / sum(bartlett(n));
+  
+  transformadas2 = transformadas;
+  
+  tic
+  for i= 1:columns(transformadas)
+    transformadas2(:,i) = abs(ifft(fft(transformadas(:,i),2*tam).*fft(filtro,2*tam)))(1:end/2);
+  end
+  toc
+  
+  maxdb = prctile(transformadas2, 90,1)-3;
+  
+  rango = -(rows(transformadas)/2)+1:(rows(transformadas)/2);
+  
+  
+  figure
+  hold on 
+  plot(rango,transformadas(:,600));
+  plot(rango(n:end), transformadas2(:,600)(n:end),'color', 'red');
+  hold off
+  axis([rango(1) rango(end)])
+  grid()
+  
+  cambiarEjeX("%0.00fHz", PRF/(2*rango(end)))
+  cambiarEjeY("%ddB", 1);
+  
+  tic
+  for i = 1:columns(transformadas2)
+    indices =find(transformadas2(:,i) >= maxdb(i)); 
+    fc1(i) = indices(1);
+    fc2(i) = indices(end);
+  end
+  toc
+  
+  fc1=(fc1-rango(end))*PRF/(2*rango(end));
+  fc2=(fc2-rango(end))*PRF/(2*rango(end));
+  bw = fc2.-fc1;
+  centroide = (fc1+fc2)/2;
+  
+  figure()
+  hold on
+  plot(fc1, 'linewidth', 3);
+  plot(fc2, 'color', 'red','linewidth', 3);
+  plot(bw, 'color', 'g', 'linewidth', 3);
+  plot(centroide, 'color', 'm', 'linewidth', 3);
+  axis([395 length(fc1)-500 -125 170]);
+  grid();
+  legend("fc1", "fc2", "BW", "Centroide doppler");
+  cambiarEjeY("%0.0fHz", 1);
+  hold off;
+
+  save("-mat", "data/frecuencias.mat", "fc1", "fc2", "bw");
+  
+  ans = guardarImagen("img/frecuencias-de-corte.pdf");
+#+end_src
+#+results:
+[[file:img/frecuencias-de-corte.pdf]]
+   
+
+
+** Ejercicio 19
+
+   #+LABEL: fig-frecuencias-corte-segunda-estimacion
+   #+CAPTION: Frecuencias de corte en azimuth y ancho de banda (segunda estimación)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  PRF = 250;
+  
+  en_rango = load("data/comprimida-en-rango.mat").fft_datos_t;
+  ancho_total = columns(en_rango);
+  alto_total = rows(en_rango);
+    
+  transformadas = 10*log10(abs(fftshift(fft(en_rango,[],1),1)));
+  
+  n=128;
+  tam = rows(transformadas);
+  filtro = rectwin(n) / n;
+  filtro = bartlett(n) / sum(bartlett(n));
+  
+  transformadas2 = transformadas;
+  
+  tic
+  for i= 1:columns(transformadas)
+    transformadas2(:,i) = abs(ifft(fft(transformadas(:,i),2*tam).*fft(filtro,2*tam)))(1:end/2);
+  end
+  toc
+  
+  transformadas2 = transformadas2.';
+  
+  n=15;
+  tam = rows(transformadas2);
+  filtro = rectwin(n) / n;
+  filtro = bartlett(n) / sum(bartlett(n));
+  
+  transformadas3 = transformadas2;
+  
+  tic
+  for i= 1:columns(transformadas2)
+    transformadas3(:,i) = abs(ifft(fft(transformadas2(:,i),2*tam).*fft(filtro,2*tam)))(1:end/2);
+  end
+  toc
+  
+  transformadas3 = transformadas3.';
+  
+  maxdb = prctile(transformadas3, 90,1)-3;
+  
+  rango = -(rows(transformadas)/2)+1:(rows(transformadas)/2);
+  
+  
+  figure
+  hold on 
+  plot(rango,transformadas(:,600));
+  plot(rango(128:end), transformadas3(:,600)(128:end),'color', 'red');
+  hold off
+  axis([rango(1) rango(end)])
+  grid()
+  
+  cambiarEjeX("%0.00fHz", PRF/(2*rango(end)))
+  cambiarEjeY("%ddB", 1);
+  
+  tic
+  for i = 1:columns(transformadas3)
+    indices =find(transformadas3(:,i) >= maxdb(i)); 
+    fc1(i) = indices(1);
+    fc2(i) = indices(end);
+  end
+  toc
+  
+  fc1=(fc1-rango(end))*PRF/(2*rango(end));
+  fc2=(fc2-rango(end))*PRF/(2*rango(end));
+  bw = fc2.-fc1;
+  centroide = (fc1+fc2)/2;
+  
+  figure()
+  hold on
+  plot(fc1, 'linewidth', 3);
+  plot(fc2, 'color', 'red','linewidth', 3);
+  plot(bw, 'color', 'g', 'linewidth', 3);
+  plot(centroide, 'color', 'm', 'linewidth', 3);
+  axis([395 length(fc1)-500 -125 170]);
+  grid();
+  legend("fc1", "fc2", "BW", "Centroide doppler");
+  cambiarEjeY("%0.0fHz", 1);
+  hold off;
+  
+  save("-mat", "data/frecuencias.mat", "fc1", "fc2", "bw");
+  
+  ans = guardarImagen("img/frecuencias-de-corte-2.pdf");
+#+end_src
+#+results:
+   [[file:img/frecuencias-de-corte-2.pdf]]
+
+
+** Ejercicio 22
+
+   #+LABEL: fig-compresion-azimuth
+   #+CAPTION: Imagen comprimida en azimuth
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  PRF = 250;
+  
+  frecuencias = load("data/frecuencias.mat");
+  fc1 = frecuencias.fc1;
+  fc2 = frecuencias.fc2;
+  bw = frecuencias.bw;
+  
+  duracion = load("data/duraciones.mat").t_chirp;
+  
+  matriz = load("data/comprimida-en-rango.mat").fft_datos_t;
+  
+  l_max = rows(matriz())+duracion(end-500)*PRF-1;
+  
+  matriz = fft(matriz,l_max);
+  
+  tic
+  comprimida = matriz;
+  for i=1:columns(matriz)
+  
+    t = 0:1/PRF:duracion(end-500);
+  
+    chirp_az = mi_chirp(fc1(i), fc2(i), bw(i), duracion(i), t)';
+    comprimida(:,i) = ifft(fft(chirp_az,l_max) .* matriz(:,i));
+  end
+  toc
+  
+  colormap('gray');
+  imagesc(10*log10(abs(comprimida(1:5000,395:end-500))));
+  ans = guardarImagenjpg("img/azimuth-1.jpg");
+#+end_src
+#+results:
+   [[file:img/azimuth-1.jpg]]
+
+
+   #+LABEL: fig-compresion-azimuth-kaiser
+   #+CAPTION: Imagen comprimida en azimuth (con ventaneo en la chirp)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  PRF = 250;
+  
+  frecuencias = load("data/frecuencias.mat");
+  fc1 = frecuencias.fc1;
+  fc2 = frecuencias.fc2;
+  bw = frecuencias.bw;
+  
+  duracion = load("data/duraciones.mat").t_chirp;
+  
+  matriz = load("data/comprimida-en-rango.mat").fft_datos_t;
+  
+  l_max = rows(matriz())+duracion(end-500)*PRF-1;
+  
+  matriz = fft(matriz,l_max);
+  
+  tic
+  comprimida = matriz;
+  for i=1:columns(matriz)
+  
+    t = 0:1/PRF:duracion(end-500);
+  
+    chirp_az = mi_chirp(fc1(i), fc2(i), bw(i), duracion(i), t)';
+    chirp_az = chirp_az .* kaiser(length(chirp_az), 2.14);
+    comprimida(:,i) = ifft(fft(chirp_az,l_max) .* matriz(:,i));
+  end
+  toc
+
+  azimuth =  10*log10(abs(comprimida));
+  save("-mat", "data/comprimida-en-azimuth.mat", "azimuth");
+
+  colormap('gray');
+  imagesc(azimuth(1:5000,395:end-500));
+  ans = guardarImagenjpg("img/azimuth-kaiser.jpg");
+#+end_src
+#+results:
+   [[file:img/azimuth-kaiser.jpg]]
+
+
+
+** Opcional 2
+   #+LABEL: fig-compresion-azimuth-kaiser-promediado
+   #+CAPTION: Imagen comprimida en azimuth promediado
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  matriz_0 = load("data/comprimida-en-azimuth.mat").azimuth;
+  
+  n = 8;
+  ventana = bartlett(8);
+  ventana = ventana / sum(ventana);
+  
+  longitud = rows(matriz_0)+n-1;
+  
+  filtro = fft(ventana, longitud);
+  matriz_0(matriz_0==-Inf) = -9999999;
+  matriz = fft(matriz_0, longitud);
+  
+  filtrada = matriz;
+  for i = 1:columns(matriz)
+    filtrada(:,i) = ifft(matriz(:,i).*filtro);
+  end
+  
+  colormap('gray');
+  
+  imagesc((abs(filtrada))(1:8:end,349:end-500));
+  
+  ans = guardarImagenjpg("img/azimuth-promediada.jpg");
+#+end_src
+
+#+results:
+[[file:img/azimuth-promediada.jpg]]
+
 * Algoritmo de compresión
