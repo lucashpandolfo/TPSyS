@@ -1,4 +1,4 @@
-# -*- mode: Octave; -*-
+% -*- mode: Octave; -*-
 Fs=50e6;
 PRF=250;
 
