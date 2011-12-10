@@ -946,7 +946,7 @@
 
    #+LABEL: fig-simulacion-autocorrelacion-dependencia-temporal
    #+CAPTION: Autocorrelación de diferentes chirps (variación del ancho temporal)
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[p]
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src matlab :exports results :results file
   longitud_t = 10e-6;
   t = 0:1/(4*Fs):longitud_t;
@@ -993,7 +993,38 @@
 
 ** Ejercicio 16
 
+   La correlación se define como:
 
+   $$x[n] \star y[n] = \sum_{k=-\infty}^{\infty} x[k] y^*[k-n]$$
+
+   y como ya vimos,la transformada de la correlacion es:
+
+   $${\mathcal F}| x[n] \star y[n]|(\Omega) = X(\Omega) Y^*(\Omega)$$
+
+   donde $X(\Omega)$ es la transformada de Fourier de $x[n]$, y
+   $Y^*(\Omega)$ es la transformada de Fourier conjugada de $y[n]$.
+
+   Si hacemos un remplazo $\widetilde{Y}(\Omega) = Y^*(\Omega)$, nos queda
+   que 
+
+   $${\mathcal F}| x[n] \star y[n]|(\Omega) = X(\Omega) \widetilde{Y}(\Omega)$$
+
+   Entonces, en tiempo podemos pensarlo como 
+
+   $$x[n] \star y[n] = x[n] * \tilde{y}[n]$$
+
+   Entonces, se puede calcular la convolución utilizando DFT
+
+   $$x[n] * \tilde{y}[n] = IDFT(DFT(x,N) DFT(\tilde{y},N))$$
+
+   donde $N = length(x)+length(\tilde{y})-1$ y además, por lo visto
+   anteriormente 
+
+   $$DFT(\tilde{y},N) = DFT(y,N)^*$$
+
+   Por lo tanto 
+
+   $$x[n] \star y[n] = x[n] * \tilde{y}[n] = IDFT(DFT(x,N) DFT(y,N)^*)$$
 
 \newpage   
 
