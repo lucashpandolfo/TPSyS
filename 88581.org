@@ -443,6 +443,7 @@
   subplot(511);
   original = [zeros(1,10*MPM) bartlett(50*MPM).' zeros(1,10*MPM)];
   plot(-length(original)/2+1:length(original)/2, original, 'linewidth', 4);
+  legend('A');
   axis([-length(original)/2+1 length(original)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
@@ -450,6 +451,7 @@
   subplot(512);
   desplazado = [zeros(1,(175+50+20)*MPM) zeros(1,175*MPM) bartlett(50*MPM).' zeros(1,20*MPM)];
   plot(-length(desplazado)/2+1:length(desplazado)/2, desplazado, 'linewidth', 4);
+  legend('B');
   axis([-length(desplazado)/2+1 length(desplazado)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
@@ -457,6 +459,7 @@
   subplot(513);
   parteReal = [zeros(1,20*MPM) bartlett(50*MPM).' zeros(1,175*MPM) zeros(1,175*MPM) bartlett(50*MPM).' zeros(1,20*MPM)];
   plot(-length(parteReal)/2+1:length(parteReal)/2, parteReal, 'linewidth', 4);
+  legend('C');
   axis([-length(parteReal)/2+1 length(parteReal)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
@@ -466,6 +469,7 @@
   redesplazado = [zeros(1,1100*MPM - length(parteReal)/2) parteReal];
   redesplazado = [redesplazado(end:-1:1) redesplazado]
   plot(-length(redesplazado)/2+1:length(redesplazado)/2, redesplazado, 'linewidth', 4);
+  legend('D');
   axis([-length(redesplazado)/2+1 length(redesplazado)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
@@ -475,12 +479,13 @@
   filtro(80*MPM:end-80*MPM)=0;
   filtrado = redesplazado .* filtro;
   plot(-length(filtrado)/2+1:length(filtrado)/2, filtrado, 'linewidth', 4);
+  legend('E');
   axis([-length(filtrado)/2+1 length(filtrado)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();
   
   
-  ans = guardarImagen("img/espectros-modulador-ideal.pdf");
+  ans = guardarImagenOctave("img/espectros-modulador-ideal.pdf");
 #+end_src
 #+results:
    [[file:img/espectros-modulador-ideal.pdf]]
@@ -542,8 +547,8 @@
       \naput[npos=0.5]{$\it Im(\bullet)$}
 
 
-      \nclist{ncline}[naput]{prod2,lp1 $D$,ad1 $I(t)$,salida2 $I(n)$}
-      \nclist{ncline}[naput]{prod3,lp2 $D$,ad2 $Q(t)$,salida3 $Q(n)$}
+      \nclist{ncline}[naput]{prod2,lp1 $D_i$,ad1 $I(t)$,salida2 $I(n)$}
+      \nclist{ncline}[naput]{prod3,lp2 $D_r$,ad2 $Q(t)$,salida3 $Q(n)$}
       
     \end{pspicture}
   \end{figure}
@@ -555,16 +560,17 @@
 #+begin_src octave :exports results :results file
   MPM = 2; 
 
-
   subplot(511);
   entrada = triangulo(40,1300,3000,MPM) .+ triangulo(40,-1300,3000,MPM);
   plot(-length(entrada)/2+1:length(entrada)/2,entrada, 'linewidth', 4);
+  legend('A');
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();  
   
   subplot(512);
   por_coseno = triangulo(40,2400,5000,MPM) + triangulo(40,200,5000,MPM) + triangulo(40,-2400,5000,MPM) + triangulo(40,-200,5000,MPM);
   plot(-length(por_coseno)/2+1:length(por_coseno)/2,por_coseno, 'linewidth', 4);
+  legend('B');
   axis([-length(por_coseno)/2+1 length(por_coseno)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();  
@@ -572,6 +578,7 @@
   subplot(513);
   filtrado = triangulo(40,200,480,MPM) + triangulo(40,-200,480,MPM);
   plot(-length(filtrado)/2+1:length(filtrado)/2,filtrado, 'linewidth', 4);
+  legend('C');
   axis([-length(filtrado)/2+1 length(filtrado)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();  
@@ -579,6 +586,7 @@
   subplot(514);
   por_coseno2 = 2*triangulo(40,0,880,MPM) + triangulo(40,-400,880,MPM) + triangulo(40,400,880,MPM);
   plot(-length(por_coseno2)/2+1:length(por_coseno2)/2,por_coseno2, 'linewidth', 4);
+  legend('|D_r+D_i|');
   axis([-length(por_coseno2)/2+1 length(por_coseno2)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();  
@@ -586,11 +594,12 @@
   subplot(515);
   ultimo = 2*triangulo(40,0,80,MPM);
   plot(-length(ultimo)/2+1:length(ultimo)/2,ultimo, 'linewidth', 4);
+  legend('|I+jQ|');
   axis([-length(ultimo)/2+1 length(ultimo)/2])
   cambiarEjeX("%0.0fMhz", 1/MPM);
   grid();  
   
-  ans = guardarImagen("img/espectros-demodulador-ideal.pdf");
+  ans = guardarImagenOctave("img/espectros-demodulador-ideal.pdf");
 #+end_src
 #+results:
    [[file:img/espectros-demodulador-ideal.pdf]]
@@ -687,15 +696,15 @@
   
   bw = (fc2-fc1)/10;
   
-  axis([-length(espectro)/2+1 length(espectro)/2])
+  axis([-length(espectro)/2+1 length(espectro)/2 20 50])
   cambiarEjeX('%.0fMhz',1/10);
   cambiarEjeY('%ddB', 1);
   grid();
   
 
-  text(-130,22, ['fc1: ',num2str(fc1/10-25), 'Mhz'], 'fontsize', 20);  
-  text(-130,18, ['fc2: ',num2str(fc2/10-25), 'Mhz'], 'fontsize', 20);  
-  text(-130,14, ['Ancho de banda: ',num2str(bw), 'Mhz'], 'fontsize', 20);
+  text(-130,32, ['fc1: ',num2str(fc1/10-25), 'Mhz'], 'fontsize', 20);  
+  text(-130,28, ['fc2: ',num2str(fc2/10-25), 'Mhz'], 'fontsize', 20);  
+  text(-130,24, ['Ancho de banda: ',num2str(bw), 'Mhz'], 'fontsize', 20);
 
   
   ans = guardarImagenOctave('img/chirp-real-ancho-banda.pdf');
