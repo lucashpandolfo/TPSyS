@@ -661,6 +661,26 @@
 
 ** Ejercicio 10
 
+   En el punto anterior, las chirp aparecían de un color uniforme
+   debido a que su modulo, en decibeles, es parecido a un pulso
+   rectangular (mas bien trapezoidal). Es decir que sube rápidamente,
+   se mantiene un tiempo y luego baja (figura
+   \ref{fig-chirp-real-modulo}).
+
+   #+LABEL: fig-chirp-real-modulo
+   #+CAPTION: Chirp real del SARAT (modulo en decibeles)
+   #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  chirp_real = cargarChirp();
+  plot(1:length(chirp_real),10*log10(chirp_real), 'linewidth', 4);
+  cambiarEjeX("%.00fus",1e6/Fs);
+  cambiarEjeY("%ddB", 1);
+  grid();
+  ans = guardarImagenOctave("img/chirp-real-logmodulo.pdf");
+#+end_src
+#+results:
+   [[file:img/chirp-real-logmodulo.pdf]]
+
    #+LABEL: fig-chirp-real-espectro
    #+CAPTION: Chirp real del SARAT (espectro)
    #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
@@ -681,15 +701,16 @@
    #+CAPTION: Chirp real del SARAT (ancho de banda)
    #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
+  suavizado=32;
   chirp_real = cargarChirp();
   espectro = fftshift(abs(fft(chirp_real)));
   espectro = espectro.';
-  espectro = suavizar(espectro,4);
+  espectro = suavizar(espectro,suavizado);
   espectro = 10*log10(espectro);
   offset= -length(espectro)/2+1;
   plot(offset:length(espectro)/2,espectro, 'linewidth',4);
   
-  maxdb = prctile(espectro,80);
+  maxdb = prctile(espectro(suavizado:end-suavizado),90);
   indices = find(espectro >= maxdb-3); 
   fc1 = indices(1);
   fc2 = indices(end);
