@@ -764,18 +764,30 @@
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   datos_no_chirp = cargarMatrizCompleta();
-  datos_no_chirp = datos_no_chirp(201:end,350:end);
-  espectros = fftshift(abs(fft(datos_no_chirp, [] ,2))); #fft de cada fila
-  espectro = sum(espectros,1)/rows(datos_no_chirp);
+  datos_no_chirp = datos_no_chirp(201:end,395:end);
+  espectros = fft(datos_no_chirp, [] ,2); #fft de cada fila
+  
+  argumentos = arg(espectros);
+  argumento =  sum(argumentos,1)/rows(datos_no_chirp);
+  
+  espectro = sum(abs(fftshift(espectros)),1)/rows(datos_no_chirp);
+  
+  subplot(211);
   plot(-length(espectro)/2+1:length(espectro)/2, 10*log10(espectro), 'linewidth', 4)
-  
   axis([-length(espectro)/2+1 length(espectro)/2])
-  
   cambiarEjeY("%ddB", 1);
   cambiarEjeX("%0.0fMhz", (Fs/2)/(length(espectro)/2) * 1e-6);
-  
   grid();
-  ans = guardarImagen("img/espectro-rango.pdf");
+  
+  subplot(212);
+  plot(-length(espectro)/2+1:length(espectro)/2, argumento, 'linewidth', 4)
+  set(gca, 'ytick', [-pi -pi/2 0 pi/2 pi])
+  set(gca, 'interpreter', 'tex');
+  set(gca,'YTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
+  cambiarEjeX("%0.0fus", 1e6/Fs);
+  grid();
+  
+  ans = guardarImagenOctave("img/espectro-rango.pdf");
 #+end_src
 #+results:
    [[file:img/espectro-rango.pdf]]
@@ -795,7 +807,7 @@
   cambiarEjeX("%0.0fHz", (PRF/2)/(length(espectro)/2));
   
   grid();
-  ans = guardarImagen("img/espectro-azimuth.pdf");
+  ans = guardarImagenOctave("img/espectro-azimuth.pdf");
 #+end_src
 #+results:
    [[file:img/espectro-azimuth.pdf]]
@@ -852,18 +864,19 @@
    que
    $$y[n] \star x[n] = Y(\Omega) X^*(\Omega) = Y(\Omega) X(\Omega)$$
 
-
-   No obstante, si lo que nos interesa es el módulo de la
-   transformada, es decir 
-
-   $$\big| {\mathcal F}| x[n] \star y[n]|(\Omega) \big|$$
-
-   se puede ver a simple vista que la operación es conmutativa, puesto
-   que
-   
-   $$|X(\Omega) Y^*(\Omega)| = |X^*(\Omega) Y(\Omega)|$$
+   Por lo tanto la correlación no es una operación conmutativa.
 
 ** Ejercicio 14
+
+   En la figura \ref{fig-simulacion-autocorrelacion} se puede apreciar
+   la autocorrelación de la chirp. El ancho del lóbulo principal es de
+   unos $0.4\mu s$. Como estamos mandando una señal de $10\mu s$ y
+   resulta en un pulso de $0.4 \mu s$ la compresión de pulso se da en
+   un factor de $\frac{10 \mu s}{0.25 \mu s} = 40$ aproximadamente. Si
+   quisieramos obtener la misma resolución con un pulso convencional
+   necesitaríamos en el radar un generador de alta potencia ya que
+   mientras mas angosto el pulso mas difícil es su detección y por lo
+   tanto el pulso debe tener mas potencia.
 
    #+LABEL: fig-simulacion-autocorrelacion
    #+CAPTION: Autocorrelación de la chirp del SARAT
@@ -873,7 +886,6 @@
   grid();
   fft_chirp = fft(chirp,length(chirp)*2);
   correlacion = ifft(fft_chirp .* conj(fft_chirp));
-  #correlacion = [correlacion correlacion];
   plot(-length(correlacion)/2+1:length(correlacion)/2, fftshift(abs(correlacion)),'linewidth', 2);
   cambiarEjeX("%0.0fus",1/100);
   ans = guardarImagen("img/simulacion-autocorrelacion.pdf");
@@ -881,7 +893,110 @@
 #+results:
    [[file:img/simulacion-autocorrelacion.pdf]]
 
+** Ejercicio 15
+
+   #+LABEL: fig-simulacion-autocorrelacion-dependencia
+   #+CAPTION: Autocorrelación de diferentes chirps
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src matlab :exports results :results file
+  longitud_t = 10e-6;
+  t = 0:1/(4*Fs):longitud_t;
+  
+  chirps{1} = {mi_chirp(-2.5e-6,2.5e6,0,longitud_t,t), '5Mhz, 10us'};
+  chirps{2} = {mi_chirp(-10e-6,10e6,0,longitud_t,t), '20Mhz, 10us'};
+  chirps{3} = {mi_chirp(-20e-6,20e6,0,longitud_t,t), '40Mhz, 10us'};
+  chirps{4} = {mi_chirp(-30e-6,30e6,0,longitud_t,t), '60Mhz, 10us'};
+  chirps{5} = {mi_chirp(-40e-6,40e6,0,longitud_t,t), '80Mhz, 10us'};
+  chirps{6} = {mi_chirp(-50e-6,50e6,0,longitud_t,t), '100Mhz,10us'};
+  
+  maximo = length(chirps);
+  for i = 1:maximo
+    subplot(maximo/2,2,i)
+  
+    chirp = chirps{i}{1};
+    fft_chirp = fft(chirp,length(chirp)*2);
+  
+    correlacion = ifft(fft_chirp .* conj(fft_chirp));
+  
+    plot(-length(correlacion)/2+1:length(correlacion)/2, fftshift(abs(correlacion)),'linewidth', 0.5);
+  
+    mitad = correlacion(length(correlacion)/2:end);
+    
+    indices =find(correlacion <= 10); 
+    ancho_principal = (indices(1)*1.3)*2*1e-6/100;
+
+    compresion = longitud_t/ancho_principal;
+  
+    text(120,1300, ['Compresion: ', num2str(compresion,'%0.0f')]);
+    title(chirps{i}{2});
+    axis([-2000 2000 0 2000]);
+
+  
+    cambiarEjeX('%0.0fus',1/100);
+  
+    grid();
+  end
+  
+  ans = guardarImagen('img/simulacion-autocorrelacion-dependencia.pdf');
+  
+#+end_src
+#+results:
+   [[file:img/simulacion-autocorrelacion-dependencia.pdf]]
+
+
+   #+LABEL: fig-simulacion-autocorrelacion-dependencia-temporal
+   #+CAPTION: Autocorrelación de diferentes chirps (variación del ancho temporal)
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[p]
+#+begin_src matlab :exports results :results file
+  longitud_t = 10e-6;
+  t = 0:1/(4*Fs):longitud_t;
+  
+  chirps{1} = {mi_chirp(-2.5e-6,2.5e6,0,10e-6,t), 10e-6};
+  chirps{2} = {mi_chirp(-2.5e-6,2.5e6,0,15e-6,t), 15e-6};
+  chirps{3} = {mi_chirp(-2.5e-6,2.5e6,0,30e-6,t), 30e-6};
+  chirps{4} = {mi_chirp(-2.5e-6,2.5e6,0,50e-6,t), 50e-6};
+  
+  maximo = length(chirps);
+  for i = 1:maximo
+    subplot(maximo/2,2,i)
+
+    chirp = chirps{i}{1};
+    fft_chirp = fft(chirp,length(chirp)*2);
+
+    correlacion = ifft(fft_chirp .* conj(fft_chirp));
+
+    plot(-length(correlacion)/2+1:length(correlacion)/2, fftshift(abs(correlacion)),'linewidth', 0.5);
+
+    mitad = correlacion(length(correlacion)/2:end);
+
+    indices =find(correlacion <= 1); 
+    ancho_principal = indices(1)*2*1e-6/100;
+
+    longitud_t = chirps{i}{2};
+
+    compresion = longitud_t/ancho_principal;
+
+    text(120,1300, ['Compresion: ', num2str(compresion,'%0.0f')]);
+    title(num2str(chirps{i}{2}*1e6,'5Mhz, %0.0fus'));
+    axis([-2000 2000 0 2000]);
+
+    cambiarEjeX('%0.0fus',1/100);
+
+    grid();
+  end
+
+  ans = guardarImagen('img/simulacion-autocorrelacion-dependencia-temporal.pdf');
+#+end_src
+#+results:
+   [[file:img/simulacion-autocorrelacion-dependencia-temporal.pdf]]
+   
+
+** Ejercicio 16
+
+
+
 \newpage   
+
 * Compresión en rango
 ** Ejercicio 17
    #+LABEL: fig-compresion-en-rango
