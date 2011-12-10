@@ -1,6 +1,8 @@
+#+LATEX_HEADER: \usepackage{pst-sigsys}
+#+LATEX_HEADER: \usepackage{auto-pst-pdf}
 #+LATEX_HEADER: \pagestyle{fancy}
-#+LATEX_HEADER: \setlength{\parskip}{0}
-#+LATEX_HEADER: \parindent=0
+#+LATEX_HEADER: \setlength{\parskip}{0cm}
+#+LATEX_HEADER: \parindent=0cm
 #+TITLE: 
 #+OPTIONS:  toc:nil
 #+LATEX_HEADER: \lhead{\includegraphics[width=1.5cm]{img/Logo-fiuba}} \chead{66.74  - Señales y Sistemas} \rhead{\Huge FIUBA}
@@ -45,7 +47,7 @@
 
     #+LABEL: fig-eta-vs-rango
     #+CAPTION: $\eta$ en función del rango $r_k$
-    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   h = 5375;
   n_near = 18.24*pi/180;
@@ -69,7 +71,7 @@
 
     #+LABEL: fig-deltar-vs-rango
     #+CAPTION: $\Delta R$ en función del rango $r_k$
-    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   h = 5375;
   n_near = 18.24*pi/180;
@@ -128,15 +130,20 @@
 
    Por lo tanto, la fase instantánea es
 
-   $$f\_inst(t) =  4\,10^{12} t^2 - 20\,10^6 t$$
+   $$f\_inst(t) =  4 \times 10^{12} t^2 - 20 \times 10^6 t$$
 
    En la figura \ref{fig-chirp-no-modulada} se puede ver el resultado
    de graficar las partes real e imaginarias de la chirp junto con la
-   fase instantánea en función del tiempo.
+   fase instantánea en función del tiempo. \\
+
+   La chirp tiene una frecuencia máxima de 20Mhz y por Nyquist la
+   mínima frecuencia de muestreo que podemos usar es 40Mhz, si no se
+   satisface el criterio de Nyquist se producen resultados como el de
+   la figura \ref{fig-chirp-no-modulada-no-nyquist}.
 
     #+LABEL: fig-chirp-no-modulada
     #+CAPTION: Chirp emitida por el SARAT (no modulada)
-    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[p]
 #+begin_src octave :exports results :results file
   t = 0:1/Fs:10e-6
   chirp_nm = chirp_no_modulada(t);
@@ -166,7 +173,7 @@
 
     #+LABEL: fig-chirp-no-modulada-no-nyquist
     #+CAPTION: Chirp emitida por el SARAT (no modulada) submuestreada
-    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[p]
 #+begin_src octave :exports results :results file
   t = 0:1/(Fs/2):10e-6
   chirp_nm = chirp_no_modulada(t);
@@ -195,7 +202,7 @@
 
     #+LABEL: fig-espectro-chirp-no-modulada
     #+CAPTION: Espectro de la  Chirp emitida por el SARAT (no modulada)
-    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: width=0.9\columnwidth placement=[p]
 #+begin_src octave :exports results :results file
   t = 0:1/(Fs):10e-6
   chirp_nm = chirp_no_modulada(t);
@@ -210,20 +217,16 @@
 #+results:
    [[file:img/espectro-chirp-no-modulada.pdf]]
 
-   La chirp tiene una frecuencia máxima de 20Mhz y por Nyquist la
-   mínima frecuencia de muestreo que podemos usar es 40Mhz, si no se
-   satisface el criterio de Nyquist se producen resultados como el de
-   la figura \ref{fig-chirp-no-modulada-no-nyquist}.
 
 ** Ejercicio 3
 
     #+LABEL: fig-chirp-no-modulada-espectrograma
     #+CAPTION: Espectrograma de la Chirp emitida por el SARAT (no modulada)
-    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   t = 0:1/Fs:10e-6*10;
   chirp_nm = real(chirp_no_modulada(t))
-  specgram(chirp_nm,[],Fs,50,40);
+  specgram(chirp_nm,[],Fs,hann(50),40);
   cambiarEjeY("%0.0fMhz", 1e-6);
   cambiarEjeX("%0.0fus", 1e6);
   ans = guardarImagen("img/chirp-no-modulada-espectro.pdf");
@@ -233,11 +236,11 @@
 
     #+LABEL: fig-chirp-no-modulada-espectrograma-submuestreada
     #+CAPTION: Espectrograma de la Chirp emitida por el SARAT (no modulada) submuestreada
-    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+    #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   t = 0:1/(Fs/2):10e-6*10;
   chirp_nm = real(chirp_no_modulada(t))
-  specgram(chirp_nm,[],Fs/2,50,40);
+  specgram(chirp_nm,[],Fs/2,hann(50),40);
   cambiarEjeY("%0.0fMhz", 1e-6);
   cambiarEjeX("%0.0fus", 1e6);
   ans = guardarImagen("img/chirp-no-modulada-espectro-submuestreada.pdf");
@@ -245,13 +248,29 @@
 #+results:
    [[file:img/chirp-no-modulada-espectro-submuestreada.pdf]]
 
+   Para realizar los espectrogramas se utilizó una ventana de hann de
+   largo 50 y un solapamiento de 40 muestras. Como la frecuencia de
+   muestreo es de 50Mhz, el aliasing se puede observar cuando la
+   frecuencia de la chirp sobrepasa los 25Mhz, es en este momento
+   cuando la frecuencia de la chirp parece estar disminuyendo y cae
+   hasta cero para luego volver a crecer hasta los 25Mhz. \\
+
    El uso de diferentes tipos de ventana altera los contenidos de
    frecuencia de la señal original. En las figura
    \ref{fig-comparacion-ventanas} se muestra una comparación de
    aplicar diferentes tipos de ventanas a las primeras 100 muestras de
    la chirp generada en puntos anteriores y en la figura
    \ref{fig-comparacion-ventanas2} se muestran los resultados de
-   utilizar cada una de estas ventanas al espectrograma.
+   utilizar cada una de estas ventanas al espectrograma.  \\
+
+   Por último en la figura \ref{fig-comparacion-solapamiento} se
+   muestra el efecto de utilizar diferentes solapamientos. Cuanto mas
+   se solapan las ventanas, mayor resolución se obtiene para un
+   instante dado. Notar que en los casos de bajo solapamiento para
+   toda una franja de tiempo se tiene los mismos componentes de
+   frecuencia, mientras que en los de alto solapamiento esta franja de
+   tiempo se hace muy pequeña.
+
 
     #+LABEL: fig-comparacion-ventanas
     #+CAPTION: Comparación de diferentes tipos de ventanas
@@ -280,7 +299,7 @@
   ans = guardarImagen("img/comparacion-ventanas.pdf");
 #+end_src
 #+results:
-[[file:img/comparacion-ventanas.pdf]]
+   [[file:img/comparacion-ventanas.pdf]]
 
     #+LABEL: fig-comparacion-ventanas2
     #+CAPTION: Comparación de diferentes tipos de ventanas (espectrogramas)
@@ -312,6 +331,35 @@
    [[file:img/comparacion-ventanas2.pdf]]
 
 
+    #+LABEL: fig-comparacion-solapamiento
+    #+CAPTION: Comparación de diferentes solapamientos para una ventana de Hann 50 muestras (espectrogramas)
+    #+ATTR_LaTeX: angle=-90,width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  t = 0:1/(Fs):10e-6*10;
+  chirp_nm = real(chirp_no_modulada(t))
+  longitud = 50;
+  inicio = 20;
+  chirp_window = chirp_nm(inicio:inicio+longitud-1);
+  solapamiento{1} = {0, "Sin solapamiento"};
+  solapamiento{2} = {15, "15 muestras"};
+  solapamiento{3} = {30, "30 muestras"};
+  solapamiento{4} = {49, "49 muestras"};
+  
+  max = length(solapamiento);
+  for i = 1:max
+    subplot(max/2,2,i)
+    specgram(chirp_nm,[],Fs,hann(longitud),solapamiento{i}{1});
+    cambiarEjeY("%0.0fMhz", 1e-6);
+    cambiarEjeX("%0.0fus", 1e6);
+    title(solapamiento{i}{2});
+  end
+  
+  ans = guardarImagen("img/comparacion-solapamientos.pdf");
+#+end_src
+#+results:
+   [[file:img/comparacion-solapamientos.pdf]]
+
+
 ** Ejercicio 4
 
    La chirp está definida como:
@@ -326,11 +374,12 @@
    $$f\_inst(t) = 2 k_1 t + k_2$$
 
    Donde $k_2$ es la frecuencia inicial y $2 k_1$ es el incremento de
-   frecuencia por unidad de tiempo.
+   frecuencia por unidad de tiempo. Se ve entonces que $f\_inst(t)$ es
+   una función lineal del tiempo con $2 k_1$ como la pendiente.
 
    #+LABEL: fig-chirp-frecuencia-instantanea
    #+CAPTION: Frecuencia instantánea de la chirp
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+   #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   t = 0:1/Fs:10e-6;
   plot(t,4e12*t-20e6, 'linewidth', 5);
@@ -344,13 +393,49 @@
 [[file:img/chirp-frecuencia-instantanea.pdf]]
 
 
-*** TODO ancho de banda formalmente
-
 ** Ejercicio 5
+
+#+BEGIN_LATEX
+  \begin{figure}[ht]
+    \centering %
+    \begin{pspicture}[showgrid=false](0,0)(10,5)
+      
+      \psset{style = RoundCorners , style = Arrow , linecolor=blue, FillColor=blue!20}
+      
+      \fnode[style=Dash,linecolor=blue,framesize=6 4, fillstyle=none](3,2){generador}
+      \nput{90}{generador}{Generador de Chirp}
+      
+      \psblock(1,1){chirp}{$Chirp$}
+      
+      \pscircleop[operation=times](3,1){prod1}
+      
+      \psblock(5,1){real}{$\it Re (\bullet)$}
+  
+      \pscircleop[operation=times](7,1){prod2}
+  
+      \psblock(9,1){bp}{$BP$}
+  
+      \pssignal(10,1){fin}{$E$}
+  
+      \psblock(3,3){exp}{$e^{(j\omega_0 t)}$}
+  
+      \psblock(7,3){modulador}{$Cos(\omega_1 t)$}
+      \nput{90}{Modulador}
+  
+      \nclist{ncline}[naput]{chirp,prod1 $A$,real $B$,prod2 $C$,bp $D$,fin}
+  
+      \ncline{exp}{prod1}
+  
+      \ncline{modulador}{prod2}
+      
+    \end{pspicture}
+  \end{figure}
+  
+#+END_LATEX
 
    #+LABEL: fig-espectros-modulador-ideal
    #+CAPTION: Espectro de las señales en las diferentes fases del modulador
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+   #+ATTR_LaTeX: width=0.7\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   
   MPM = 2; 
@@ -400,11 +485,73 @@
 #+results:
    [[file:img/espectros-modulador-ideal.pdf]]
 
+
 ** Ejercicio 6
+
+
+#+BEGIN_LATEX
+  \begin{figure}[H]
+    \centering %
+    \begin{pspicture}[showgrid=false](-1,-5)(11,4)
+      
+      \psset{style = RoundCorners , style = Arrow , linecolor=blue, FillColor=blue!20}
+
+      \pssignal(0,1){inicio}{}
+
+      \psblock(2,1){bp}{$BP$}
+      
+      \pscircleop[operation=times](4,1){prod1}
+      
+      \psblock(6,1){bp2}{$BP$}
+
+      \pssignal(9,1){salida1}{Señal en FI}
+
+      \psblock(4,3){cos1}{$Cos(\omega_1 t)$}
+         \nput{90}{Demodulador 1}
+  
+      \nclist{ncline}[naput]{inicio,bp,prod1 $A$,bp2 $B$,salida1 $C$}
+  
+      \ncline{cos1}{prod1}
+
+
+      \pssignal(-1,-3){inicio2}{Señal en FI}
+
+      \dotnode(1,-3){dot}    
+
+      \pscircleop[operation=times](2,-2){prod2}
+      \psblock(5,-2){lp1}{$LP$}
+      \psblock(7,-2){ad1}{$A/D$}
+      \pssignal(9,-2){salida2}{}
+
+      \pszero[zeroradius=0.4](3.5,-3){p1}
+         \nput{0}{p1}{$e^{-j\omega_0 t}$}
+
+      \pscircleop[operation=times](2,-4){prod3}
+      \psblock(5,-4){lp2}{$LP$}
+      \psblock(7,-4){ad2}{$A/D$}
+      \pssignal(9,-4){salida3}{}
+
+      
+      \ncline{-}{inicio2}{dot}
+      \ncangle[angleA=90,angleB=180,fillstyle=none]{dot}{prod2}
+      \ncangle[angleA=-90,angleB=180,fillstyle=none]{dot}{prod3}
+
+      \ncangle[angleA=180,angleB=-90,fillstyle=none,offsetA=-0.2,offsetB=0]{p1}{prod2}
+      \nbput[npos=0.5]{$\it Re(\bullet)$}
+      \ncangle[angleA=180,angleB=90,fillstyle=none,offsetA=0.2,offsetB=0]{p1}{prod3}
+      \naput[npos=0.5]{$\it Im(\bullet)$}
+
+
+      \nclist{ncline}[naput]{prod2,lp1 $D$,ad1 $I(t)$,salida2 $I(n)$}
+      \nclist{ncline}[naput]{prod3,lp2 $D$,ad2 $Q(t)$,salida3 $Q(n)$}
+      
+    \end{pspicture}
+  \end{figure}
+#+END_LATEX
 
    #+LABEL: fig-espectros-modulador-ideal
    #+CAPTION: Espectro de las señales en las diferentes fases del demodulador
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+   #+ATTR_LaTeX: width=0.7\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   MPM = 2; 
 
@@ -447,27 +594,25 @@
 #+end_src
 #+results:
    [[file:img/espectros-demodulador-ideal.pdf]]
-
+   
 ** Ejercicio 7
-   Las señales $I(t)$ y $Q(t)$, no son mas que las pertes real e
-   imaginaria de la chirp emitida por el SARAT. El modulador lo que
-   hace es desplazar el espectro de la chirp hasta los 1300Mhz (la
-   modula) y luego la emite. Esta señal es reflejada por el suelo y
-   vuelve al radar. Como estamos considerando que la señal al viajar
-   hasta el suelo, rebotar y volver está pasando por un sistema LTI
-   que solo introduce un retardo o un cambio de fase, la señal que
-   recibe el radar es la misma que emitió, solo que con algún cambio
-   de fase. Luego se pasa la señal a una banda intermedia de 200Mhz y
-   por último es multiplicada por un coseno de 200Mhz en el caso de
-   $I(t)$ o por un seno de la misma frecuencia para el caso de $Q(t)$.
-
-*** TODO redondeamelo
+   El modulador lo que hace es desplazar el espectro de la chirp hasta
+   los 1300Mhz (la modula) y luego la emite. Esta señal es reflejada
+   por el suelo y vuelve al radar. Como estamos considerando que la
+   señal al viajar hasta el suelo, rebotar y volver está pasando por
+   un sistema LTI que solo introduce un retardo y un cambio de fase,
+   la señal que recibe el radar es la misma que emitió, solo que con
+   algún cambio de fase. Luego se pasa la señal a una banda intermedia
+   de 200Mhz y por último es multiplicada por un coseno de 200Mhz en
+   el caso de $I(t)$ o por un seno de la misma frecuencia para el caso
+   de $Q(t)$. Entonces, las señales $I(t)$ y $Q(t)$, no son mas que
+   las pertes real e imaginaria de la chirp emitida por el SARAT
+   retrazada y con un cambio de fase.
 
 ** Ejercicio 8
   Tanto el modulador como el demodulador son sistemas LTI. Como
   consideramos el mundo fuera del SARAT como un sistema LTI, entonces
   todo el sistema en su totalidad es LTI.
-
 
 \newpage
 * Parte digital
@@ -475,45 +620,41 @@
    #+LABEL: fig-datos-crudos
    #+CAPTION: Datos crudos del SARAT (subset)
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
-#+begin_src octave :exports results :results file
+#+begin_src matlab :exports results :results file
   colormap('gray');
   
-  datos = cargarMatriz();
+  datos = cargarMatrizCompleta();
   
-  tic;
-    datos = 10*log10(abs(datos));
-  toc;
+  datos = 10*log10(abs(datos));
   
-  figure(1, 'visible', 'off');
-    imagesc(datos);
-  tic
+  imagesc(datos);
   
-  ans = guardarImagen("img/datos-crudos.pdf");
-  toc
+  ans = guardarImagenjpg('img/datos-crudos.jpg');
 #+end_src
 #+results:
-   [[file:img/datos-crudos.pdf]]
+   [[file:img/datos-crudos.jpg]]
 
    Podemos ver en la figura \ref{fig-datos-crudos}, que la ventana de
-   recepción (ancho total de la imagen) dura 9000 muestras y que en
+   recepción (ancho total de la imagen) dura 3000 muestras y que en
    cada línea (exceptuando las primeras 200) hay una región muy oscura
-   al inicio de aproximadamente 350 muestras. Las primeras 200 lineas
+   al inicio de aproximadamente 395 muestras. Las primeras 200 lineas
    contienen solamente un muestreo de la chirp emitida por el
    SARAT. La duración de esta chirp es de 500 muestras o $10\mu
    s$. Entonces conociendo esta equivalencia entre cantidad de
    muestras y tiempo, podemos calcular que la ventana de adquisición
-   dura $180 \mu s$. Si hacemos el cálculo teórico vemos que,
-   primero, estamos tomando muestras a 50Mhz y que la cantidad de
-   muestras horizontales es de 9000, entonces $\frac{9000}{50\,\,
-   10^6} = 180\,\,10^{-6}$, y segundo para el rango $r_0 = 5659m$ y
-   considerando que las ondas viajan a la velocidad de la luz y deben
-   viajar de ida y vuelta, la onda tarda en viajar unos $37.75\mu s$.
+   dura $60 \mu s$. También sabemos que las 395 muestras al inicio de
+   cada fila equivalen a $7.9 \mu s$ que es el tiempo desde que se
+   abre la ventana de recepción hasta que comienzan a llegar los
+   datos. Si hacemos el cálculo teórico vemos que estamos tomando
+   muestras a 50Mhz y que la cantidad de muestras horizontales es de
+   3000, entonces $\frac{3000}{50\times 10^6} = 60\times10^{-6} = 60
+   \mu s$.
 
 ** Ejercicio 10
 
    #+LABEL: fig-chirp-real-espectro
    #+CAPTION: Chirp real del SARAT (espectro)
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+   #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   chirp_real = cargarChirp();
   espectro = fftshift(abs(fft(chirp_real)));
@@ -529,16 +670,35 @@
 
    #+LABEL: fig-chirp-real-espectro-ancho-banda
    #+CAPTION: Chirp real del SARAT (ancho de banda)
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+   #+ATTR_LaTeX: width=0.6\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   chirp_real = cargarChirp();
   espectro = fftshift(abs(fft(chirp_real)));
-  plot(-length(espectro)/2+1:length(espectro)/2,10*log10(espectro), 'linewidth', 4);
+  espectro = espectro.';
+  espectro = suavizar(espectro,4);
+  espectro = 10*log10(espectro);
+  offset= -length(espectro)/2+1;
+  plot(offset:length(espectro)/2,espectro, 'linewidth',4);
+  
+  maxdb = prctile(espectro,80);
+  indices = find(espectro >= maxdb-3); 
+  fc1 = indices(1);
+  fc2 = indices(end);
+  
+  bw = (fc2-fc1)/10;
+  
   axis([-length(espectro)/2+1 length(espectro)/2])
-  cambiarEjeX("%.0fMhz",1/10);
-  cambiarEjeY("%ddB", 1);
+  cambiarEjeX('%.0fMhz',1/10);
+  cambiarEjeY('%ddB', 1);
   grid();
-  ans = guardarImagen("img/chirp-real-ancho-banda.pdf");
+  
+
+  text(-130,22, ['fc1: ',num2str(fc1/10-25), 'Mhz'], 'fontsize', 20);  
+  text(-130,18, ['fc2: ',num2str(fc2/10-25), 'Mhz'], 'fontsize', 20);  
+  text(-130,14, ['Ancho de banda: ',num2str(bw), 'Mhz'], 'fontsize', 20);
+
+  
+  ans = guardarImagenOctave('img/chirp-real-ancho-banda.pdf');
 #+end_src
 #+results:
    [[file:img/chirp-real-ancho-banda.pdf]]
@@ -738,19 +898,19 @@
   toc
   
   tic
-  ans = print('-djpeg', 'img/compresion-en-rango.jpg');
+  ans = guardarImagenjpg('img/compresion-en-rango.jpg');
   toc
   
   toc
 #+end_src
 #+results:
-   [[file:img/compresion-en-rango.pdf]]
+   [[file:img/compresion-en-rango.jpg]]
 \newpage
 * Compresión en azimuth
 ** Opcional 1
 
    #+LABEL: fig-longitud-chirp-vs-angulo
-   #+CAPTION: Datos crudos del SARAT (subset)
+   #+CAPTION: Duración de la chirp en función del \eta_rango
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   v_plat = 108;  #108 m/s
@@ -859,7 +1019,7 @@
   
 #+end_src
 #+results:
-[[file:img/frecuencias-de-corte.pdf]]
+   [[file:img/frecuencias-de-corte.pdf]]
    
 
 
@@ -931,7 +1091,6 @@
   bw = fc2-fc1;
   centroide = (fc1+fc2)/2;
   
-  figure()
   hold on
   plot(fc1, 'linewidth', 1);
   plot(fc2, 'color', 'red','linewidth', 1);
@@ -945,7 +1104,7 @@
   
   save('data/frecuencias.mat', 'fc1', 'fc2', 'bw');
   
-  ans = guardarImagen('img/frecuencias-de-corte-2.pdf');  
+  ans = guardarImagen('img/frecuencias-de-corte-2.pdf');
 #+end_src
 #+results:
    [[file:img/frecuencias-de-corte-2.pdf]]
@@ -989,11 +1148,11 @@
   colormap('gray');
   comprimida = 10*log10(abs(comprimida(1:end,395:end-500)));
   imagesc(comprimida);
-  ans = guardarImagen('img/azimuth-1.pdf');
+  ans = guardarImagenjpg('img/azimuth-1.jpg');
   
 #+end_src
 #+results:
-   [[file:img/azimuth-1.pdf]]
+   [[file:img/azimuth-1.jpg]]
 
 
    #+LABEL: fig-compresion-azimuth-kaiser
@@ -1036,10 +1195,10 @@
 
   colormap('gray');
   imagesc(azimuth(:,395:end-500));
-  ans = guardarImagen('img/azimuth-kaiser.pdf');
+  ans = guardarImagenjpg('img/azimuth-kaiser.jpg');
 #+end_src
 #+results:
-   [[file:img/azimuth-kaiser.pdf]]
+   [[file:img/azimuth-kaiser.jpg]]
 
 
    
@@ -1058,7 +1217,6 @@
   longitud = rows(matriz_0)+n-1;
   
   filtro = fft(ventana, longitud);
-  %matriz_0(matriz_0==-Inf) = -9999999;
   matriz = fft(matriz_0, longitud);
   
   filtrada = matriz;
@@ -1074,10 +1232,9 @@
   
   imagesc(abs(filtrada));
   
-  ans = guardarImagen('img/azimuth-promediada.pdf');
+  ans = guardarImagenjpg('img/azimuth-promediada.jpg');
 #+end_src
-
 #+results:
-   [[file:img/azimuth-promediada.pdf]]
+   [[file:img/azimuth-promediada.jpg]]
 
-* Algoritmo de compresión
+

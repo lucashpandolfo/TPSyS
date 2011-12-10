@@ -3,4 +3,4 @@ PRF=250;
 
 path(path, 'matlab');
 
-set(gcf, 'vesible', 'off');
+set(gcf, 'visible', 'off');
