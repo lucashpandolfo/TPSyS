@@ -1162,8 +1162,7 @@
   clear transformadas;
   
   maxdb = prctile(transformadas2, 90,1)-3;
-  
-    
+      
   tic
   for i = 1:columns(transformadas2)
     indices =find(transformadas2(:,i) >= maxdb(i)); 
@@ -1200,6 +1199,18 @@
 
 
 ** Ejercicio 19
+
+   Para obtener una segunda aproximación de las frecuencias de corte,
+   ancho de banda y centroide doppler de los datos en azimuth, se
+   utilizó un promediador móvil implementado con una ventana de
+   Bartlett de ancho 15. Si llamamos $x[n]$ a la n-esima columna de la
+   matriz (datos en azimuth) antes de promediar, e $y[n]$ a la n-esima
+   columna de la matriz luego de promediar, tenemos que
+
+   $$y[n] = \frac{a_0 x[n] + a_1 x[n+1] + a_2 x[n+2] + \cdots + a_13 x[n+13] + a_14 x[n+14]}{N}$$
+
+   Donde $a_n$ son coeficientes que forman una ventana de bartlett de
+   ancho 15 y $\displaystyle N = \sum_{n=0}^{14} a_n$.
 
    #+LABEL: fig-frecuencias-corte-segunda-estimacion
    #+CAPTION: Frecuencias de corte en azimuth y ancho de banda (segunda estimación)
