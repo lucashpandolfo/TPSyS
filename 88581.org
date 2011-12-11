@@ -860,9 +860,12 @@
 
    Entonces, por ejemplo si tenemos una $X(\Omega)$ real y una
    $Y(\Omega)$ imaginaria, no es lo mismo 
-   $$x[n] \star y[n] = X(\Omega) Y^*(\Omega) = X(\Omega) (-1)Y(\Omega)$$
+
+   $${\mathcal F}| x[n] \star y[n]|(\Omega)  = X(\Omega) Y^*(\Omega) = X(\Omega) (-1)Y(\Omega)$$
+
    que
-   $$y[n] \star x[n] = Y(\Omega) X^*(\Omega) = Y(\Omega) X(\Omega)$$
+
+   $${\mathcal F}| y[n] \star x[n]|(\Omega) = Y(\Omega) X^*(\Omega) = Y(\Omega) X(\Omega)$$
 
    Por lo tanto la correlación no es una operación conmutativa.
 
@@ -1296,6 +1299,10 @@
 #+results:
    [[file:img/frecuencias-de-corte-2.pdf]]
 
+** Ejercicio 20
+
+   El ancho de banda de las chirps se encuentra ligeremente por arriba
+   de los 100Mhz y su duración temporal depende del $\eta-rango$.
 
 ** Ejercicio 22
 
