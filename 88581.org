@@ -1541,3 +1541,86 @@
 #+results:
    [[file:img/azimuth-promediada-contrastada.jpg]]
 
+** Ejercicio 23
+   
+   #+LABEL: fig-ventana-kaiser
+   #+CAPTION: Ventana utilizada
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+
+   long_ventana = 6*PRF;
+
+   ventana = kaiser(long_ventana, 2.14)
+
+   subplot(321);
+   plot(0:length(ventana)-1, ventana, 'linewidth', 3);
+   axis([0 length(ventana)-1]);
+   grid();
+   legend('Kaiser(2.14)');
+   cambiarEjeX('%0.1fs', 1/PRF);
+
+   subplot(322);
+
+   stem(-length(ventana)/2:length(ventana)/2-1, fftshift(abs(fft(ventana))), 'linewidth', 2);
+
+   legend('|DFT(Kaiser(2.14))|');
+   axis([-length(ventana)/2 length(ventana)/2-1]);
+   set(gca, 'interpreter', 'tex');
+
+   cambiarEjeX('%0.1f ',2/length(ventana));
+
+   set(gca, 'xtick', [-length(ventana)/2 -length(ventana)/4 0 length(ventana)/4-1 length(ventana)/2-1])
+   set(gca, 'interpreter', 'tex');
+   set(gca,'XTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
+   grid();
+
+   subplot(323);
+
+
+   t = 0:1/PRF:6-1/PRF;
+
+   chirp = mi_chirp(-50,50,0,6,t).';
+
+   plot(t,real(chirp), 'linewidth', 2);
+
+   legend('Re(Chirp)');
+
+   grid();
+
+   subplot(324);
+
+   plot(-length(chirp)/2:length(chirp)/2-1, fftshift(abs(fft(chirp))), 'linewidth', 3);
+
+   legend('DFT(Chirp)');
+
+   axis([-length(chirp)/2 length(chirp)/2-1]);
+
+   set(gca, 'xtick', [-length(chirp)/2 -length(chirp)/4 0 length(chirp)/4-1 length(chirp)/2-1])
+   set(gca, 'interpreter', 'tex');
+   set(gca,'XTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
+   grid();
+
+   subplot(325);
+
+   plot(t,real(chirp.*ventana), 'linewidth', 2);
+   grid()
+
+   subplot(326);
+
+   plot(-length(chirp)/2:length(chirp)/2-1, fftshift(abs(fft(chirp.*ventana))), 'linewidth', 3);
+
+   legend('DFT(Chirp*kaiser)');
+
+   axis([-length(chirp)/2 length(chirp)/2-1]);
+
+   set(gca, 'xtick', [-length(chirp)/2 -length(chirp)/4 0 length(chirp)/4-1 length(chirp)/2-1])
+   set(gca, 'interpreter', 'tex');
+   set(gca,'XTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
+   grid();
+
+
+   ans = guardarImagen('img/efecto-kaiser-chirp.pdf');
+#+end_src
+#+results:
+   [[file:img/efecto-kaiser-chirp.pdf]]
+   
