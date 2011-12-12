@@ -760,7 +760,7 @@
 
    #+LABEL: fig-modulo-espectro-rango
    #+CAPTION: Modulo del espectro y fase del rango
-   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+   #+ATTR_LaTeX: width=0.7\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   datos_no_chirp = cargarMatrizCompleta();
   datos_no_chirp = datos_no_chirp(201:end,395:end);
@@ -787,6 +787,39 @@
 #+end_src
 #+results:
    [[file:img/espectro-rango.pdf]]
+
+   #+LABEL: fig-modulo-espectro-rango-bw
+   #+CAPTION: Ancho de banda delespectro en rango
+   #+ATTR_LaTeX: width=0.7\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  datos_no_chirp = cargarMatrizCompleta();
+  datos_no_chirp = datos_no_chirp(201:end,395:end);
+  espectros = fft(datos_no_chirp, [] ,2); %fft de cada fila
+    
+  espectro = sum(abs(fftshift(espectros)),1)/rows(datos_no_chirp);
+
+  espectro = suavizar(10*log10(espectro.'),16);
+
+  maxdb = prctile(espectro(16:end-16),90);
+
+  indices =find(espectro >= maxdb-3);
+
+  diferencia = indices(end)-indices(1);
+
+  bw=diferencia*(Fs/2)/(length(espectro)/2) * 1e-6;
+
+  plot(-length(espectro)/2+1:length(espectro)/2, espectro, 'linewidth', 3);
+  axis([-length(espectro)/2+1 length(espectro)/2])
+  cambiarEjeY('%ddB', 1);
+  cambiarEjeX('%0.0fMhz', (Fs/2)/(length(espectro)/2) * 1e-6);
+  grid();
+
+  text(-120,35,['BW: ' num2str(bw)]);
+  
+  ans = guardarImagen('img/espectro-rango-bw.pdf');
+#+end_src
+#+results:
+   [[file:img/espectro-rango-bw.pdf]]
 
    #+LABEL: fig-modulo-espectro-azimuth
    #+CAPTION: Modulo del espectro en azimuth
@@ -1655,9 +1688,9 @@
 
   end
 
-  legend(['Frecuencia central: ' num2str(chirps{1}{2})],
-         ['Frecuencia central: ' num2str(chirps{2}{2})],
-         ['Frecuencia central: ' num2str(chirps{3}{2})]);
+  legend(['Frecuencia central: ' num2str(chirps{1}{2}) 'Hz'],
+         ['Frecuencia central: ' num2str(chirps{2}{2}) 'Hz'],
+         ['Frecuencia central: ' num2str(chirps{3}{2}) 'Hz']);
 
   set(gca, 'xtick', [-0.3*fs 0 0.3*fs])
   set(gca, 'interpreter', 'tex');
