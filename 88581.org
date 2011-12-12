@@ -1470,9 +1470,6 @@
 #+end_src
 #+results:
    [[file:img/azimuth-kaiser.jpg]]
-
-
-   
    
 ** Opcional 2
    #+LABEL: fig-compresion-azimuth-kaiser-promediado
@@ -1501,12 +1498,46 @@
   colormap('gray');
   
   filtrada = filtrada(1:8:end,349:end-500);
-  
-  imagesc(abs(filtrada));
+
+  filtrada= abs(filtrada);
+
+  save('data/comprimida-en-azimuth-filtrada.mat', 'filtrada');
+
+  imagesc(filtrada);
   
   ans = guardarImagenjpg('img/azimuth-promediada.jpg');
 #+end_src
 #+results:
    [[file:img/azimuth-promediada.jpg]]
 
+** Opcional 3
+
+   #+LABEL: fig-compresion-azimuth-kaiser-promediada-contrastada
+   #+CAPTION: Imagen comprimida en azimuth con mejora de contraste
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src matlab :exports results :results file
+  matriz = load('data/comprimida-en-azimuth-filtrada.mat');
+  matriz = matriz.filtrada;
+
+  vector = matriz(200:1400,:);
+  vector = vector(:);
+
+  max = prctile(vector, 99);
+  min = prctile(vector,1);
+
+  clear(vector);
+
+  matriz(matriz>=max) = max;
+  matriz(matriz<=min) = min;
+
+  colormap('gray');
+
+  imagesc(matriz);
+
+  ans = guardarImagenjpg('img/azimuth-promediada-contrastada.jpg');
+
+#+end_src
+
+#+results:
+   [[file:img/azimuth-promediada-contrastada.jpg]]
 
