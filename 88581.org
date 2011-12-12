@@ -765,11 +765,11 @@
   datos_no_chirp = cargarMatrizCompleta();
   datos_no_chirp = datos_no_chirp(201:end,395:end);
   espectros = fft(datos_no_chirp, [] ,2); #fft de cada fila
-  
-  argumentos = arg(espectros);
-  argumento =  sum(argumentos,1)/rows(datos_no_chirp);
-  
+    
   espectro = sum(abs(fftshift(espectros)),1)/rows(datos_no_chirp);
+
+  argumento =  sum(phase(fftshift(espectros)),1)/rows(datos_no_chirp);
+
   
   subplot(211);
   plot(-length(espectro)/2+1:length(espectro)/2, 10*log10(espectro), 'linewidth', 4)
@@ -789,7 +789,6 @@
   ans = guardarImagenOctave("img/espectro-rango.pdf");
 #+end_src
 #+results:
-   [[file:img/espectro-rango.pdf]]
 
    #+LABEL: fig-modulo-espectro-azimuth
    #+CAPTION: Modulo del espectro en azimuth
@@ -1672,6 +1671,24 @@
 #+results:
    [[file:img/simulacion-autocorrelacion-desplazada.pdf]]
 
+
+** Opcional 4
+
+   Sea $y[n] = x[n] \star x[n]$:
+
+#+BEGIN_LATEX
+  \begin{eqnarray*}
+    x[n] \star x[n-m] &=& \sum_{k=-\infty}^{\infty} x[k] x[k-n-m]\\
+    &=& {\mathcal F^{-1}} \left\{  {\mathcal F}\left\{x[n]\right\}(\Omega) \,\, {\mathcal F}\left\{x[n-m]\right\}^*(\Omega) \right\} \\
+    &=& {\mathcal F^{-1}} \left\{  X(\Omega) X^*(\Omega) e^{j\Omega m} \right\} \\
+    &=& {\mathcal F^{-1}} \left\{  Y(\Omega) e^{j\Omega m} \right\} \\
+    &=& y[n+m]
+  \end{eqnarray*}
+  
+#+END_LATEX
+
+
+
 ** Opcional 6
 
 
@@ -1702,7 +1719,7 @@
       chirp_az = mi_chirp(-bw(i)/2, bw(i)/2, bw(i), duracion(i), t).';
       chirp_az = chirp_az .* kaiser(length(chirp_az), 2.14);
       centroide = (fc1(i)+fc2(i))/2;
-      columna = circshift(matriz(:,i),0*-round(centroide*rows(matriz)/PRF));
+      columna = circshift(matriz(:,i),-round(centroide*rows(matriz)/PRF));
   
       comprimida(:,i) = ifft(conj(fft(chirp_az,l_max)) .* columna);
     end
@@ -1720,6 +1737,7 @@
     ans='ok';
 #+end_src
 #+results:
+: ok
 
    #+LABEL: fig-compresion-azimuth-2
    #+CAPTION: Imagen comprimida en azimuth teniendo en cuenta el centroide doppler
