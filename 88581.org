@@ -1446,7 +1446,7 @@
   l_max = ceil(rows(matriz())+duracion(end-500)*PRF-1);
   
   matriz = fft(matriz,l_max);
-  
+
   tic
   comprimida = matriz;
   for i=1:columns(matriz)
@@ -1618,9 +1618,57 @@
    set(gca,'XTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
    grid();
 
-
    ans = guardarImagen('img/efecto-kaiser-chirp.pdf');
 #+end_src
 #+results:
    [[file:img/efecto-kaiser-chirp.pdf]]
    
+
+** Ejercicio 24
+   #+LABEL: fig-simulacion-autocorrelacion-desplazada
+   #+CAPTION: Autocorrelación de dos chirps de mismo ancho de banda con la frecuencia central desplazada
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+
+  fs = 400;
+
+  t = 0:1/fs:1;
+
+  chirp_testigo=mi_chirp(-50, 50, 0, 1, t);
+  fft_chirp_testigo=fft(chirp_testigo,length(chirp_testigo)*2);
+
+  chirps{1} = {mi_chirp(-50, 50, 0, 1, t), 0, 'b'};
+  chirps{2} = {mi_chirp(-80, 20, 0, 1, t), -30, 'r'};
+  chirps{3} = {mi_chirp(-20, 80, 0, 1, t), 30, 'g'};
+
+  for i = 1:length(chirps);
+
+     chirp = chirps{i}{1};
+
+     fft_chirp = fft(chirp,length(chirp)*2);
+
+     correlacion = ifft(fft_chirp .* conj(fft_chirp_testigo));
+
+     plot(-length(correlacion)/2:length(correlacion)/2-1, fftshift(abs(correlacion)),'linewidth', 3, 'color', chirps{i}{3});
+
+     hold on;
+
+     grid(); 
+
+     axis([-200 200])
+
+  end
+
+  legend(['Frecuencia central: ' num2str(chirps{1}{2})],
+         ['Frecuencia central: ' num2str(chirps{2}{2})],
+         ['Frecuencia central: ' num2str(chirps{3}{2})]);
+
+  set(gca, 'xtick', [-0.3*fs 0 0.3*fs])
+  set(gca, 'interpreter', 'tex');
+  
+  cambiarEjeX("%0.1fs",1/fs);
+
+  ans = guardarImagen("img/simulacion-autocorrelacion-desplazada.pdf");
+#+end_src
+#+results:
+   [[file:img/simulacion-autocorrelacion-desplazada.pdf]]
