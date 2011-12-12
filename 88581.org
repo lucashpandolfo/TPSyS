@@ -1672,3 +1672,4 @@
 #+end_src
 #+results:
    [[file:img/simulacion-autocorrelacion-desplazada.pdf]]
+
