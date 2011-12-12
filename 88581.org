@@ -57,14 +57,13 @@
   r0 = h/(cos(n_near));
   rangos = r0:c*Ts/2:r0+kmax*c*Ts/2;
   plot(0:kmax,acos(h./rangos)*180/pi, 'linewidth', 4);
-  set(gca, 'interpreter', 'tex');
   set(gca, 'ytick', 15:5:90);
   axis([0 kmax 15 90]);
   set(gca, 'xtick', 0:kmax);
-  cambiarEjeY("%0.0f^o",1);
-  cambiarEjeX("r_{%d}",1);
+  cambiarEjeY('%0.0f^o',1);
+  cambiarEjeX('r_{%d}',1);
   grid();
-  ans = guardarImagen("img/eta-vs-rango.pdf");
+  ans = guardarImagen('img/eta-vs-rango.pdf');
 #+end_src
 #+results:
    [[file:img/eta-vs-rango.pdf]]
@@ -1672,4 +1671,104 @@
 #+end_src
 #+results:
    [[file:img/simulacion-autocorrelacion-desplazada.pdf]]
+
+** Opcional 6
+
+
+#+begin_src matlab :exports none
+    PRF = 250;
+    
+    frecuencias = load('data/frecuencias.mat');
+    fc1 = frecuencias.fc1;
+    fc2 = frecuencias.fc2;
+    bw = frecuencias.bw;
+    
+    duracion = load('data/duraciones.mat');
+    duracion = duracion.t_chirp;
+    
+    matriz = load('data/comprimida-en-rango-completa.mat');
+    matriz = matriz.fft_datos_t;
+    
+    l_max = ceil(rows(matriz())+duracion(end-500)*PRF-1);
+    
+    matriz = fft(matriz,l_max);
+    
+    tic
+    comprimida = matriz;
+    for i=395:columns(matriz)-1200
+    
+      t = 0:1/PRF:duracion(end-500);
+    
+      chirp_az = mi_chirp(-bw(i)/2, bw(i)/2, bw(i), duracion(i), t).';
+      chirp_az = chirp_az .* kaiser(length(chirp_az), 2.14);
+      centroide = (fc1(i)+fc2(i))/2;
+      columna = circshift(matriz(:,i),0*-round(centroide*rows(matriz)/PRF));
+  
+      comprimida(:,i) = ifft(conj(fft(chirp_az,l_max)) .* columna);
+    end
+    toc
+    clear matriz;
+  
+    colormap('gray');
+    comprimida = comprimida(1:8000,395:end-1200);
+    comprimida = 10*log10(abs(comprimida));
+  
+    %imagesc(comprimida);
+    %ans = guardarImagenjpg('img/azimuth-2.jpg');
+  
+    save('data/comprimida-en-azimuth-2.mat', 'comprimida');
+    ans='ok';
+#+end_src
+#+results:
+
+   #+LABEL: fig-compresion-azimuth-2
+   #+CAPTION: Imagen comprimida en azimuth teniendo en cuenta el centroide doppler
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src matlab :exports results :results file
+  matriz = load('data/comprimida-en-azimuth-2.mat');
+  matriz = matriz.comprimida;
+  
+  n = 8;
+  ventana = bartlett(8);
+  ventana = ventana / sum(ventana);
+  
+  longitud = rows(matriz)+n-1;
+  
+  filtro = fft(ventana, longitud);
+  matriz = fft(matriz, longitud);
+  
+  tic
+  for i = 1:columns(matriz)
+    matriz(:,i) = ifft(matriz(:,i).*filtro);
+  end
+  toc
+  
+  colormap('gray');
+  
+  matriz = matriz(1:end,:);
+  
+  matriz = abs(matriz);
+  
+  vector = matriz(:);
+  
+  max = prctile(vector,95);
+  min = prctile(vector,5);
+  clear vector;
+  
+  matriz(matriz>=max)=max;
+  matriz(matriz<=min)=min;
+  
+    
+  set(gcf,'PaperUnits','inches','PaperPosition',[0 0 16 7])
+    
+  im = imresize(matriz, [rows(matriz)/8 columns(matriz)], 'cubic');
+  %  imagesc(matriz);
+  clear matriz;  
+  imagesc(im);
+  
+  ans = guardarImagenjpg('img/azimuth-4.jpg');
+  
+#+end_src
+#+results:
+   [[file:img/azimuth-4.jpg]]
 
