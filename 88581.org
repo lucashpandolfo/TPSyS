@@ -861,7 +861,7 @@
    Entonces, por ejemplo si tenemos una $X(\Omega)$ real y una
    $Y(\Omega)$ imaginaria, no es lo mismo 
 
-   $${\mathcal F}| x[n] \star y[n]|(\Omega)  = X(\Omega) Y^*(\Omega) = X(\Omega) (-1)Y(\Omega)$$
+   $${\mathcal F}| x[n] \star y[n]|(\Omega) = X(\Omega) Y^*(\Omega) = X(\Omega) (-1)Y(\Omega)$$
 
    que
 
@@ -875,7 +875,7 @@
    la autocorrelación de la chirp. El ancho del lóbulo principal es de
    unos $0.4\mu s$. Como estamos mandando una señal de $10\mu s$ y
    resulta en un pulso de $0.4 \mu s$ la compresión de pulso se da en
-   un factor de $\frac{10 \mu s}{0.25 \mu s} = 40$ aproximadamente. Si
+   un factor de $\frac{10 \mu s}{0.12 \mu s} \approx 83$. Si
    quisieramos obtener la misma resolución con un pulso convencional
    necesitaríamos en el radar un generador de alta potencia ya que
    mientras mas angosto el pulso mas difícil es su detección y por lo
@@ -886,15 +886,16 @@
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src octave :exports results :results file
   chirp = cargarChirp();
-  grid();
   fft_chirp = fft(chirp,length(chirp)*2);
   correlacion = ifft(fft_chirp .* conj(fft_chirp));
-  plot(-length(correlacion)/2+1:length(correlacion)/2, fftshift(abs(correlacion)),'linewidth', 2);
-  cambiarEjeX("%0.0fus",1/100);
+  plot(-length(correlacion)/2:length(correlacion)/2-1, fftshift(abs(correlacion)),'linewidth', 2);
+  grid();
+  axis([-100 100])
+  cambiarEjeX("%0.1fus",1/100);
   ans = guardarImagen("img/simulacion-autocorrelacion.pdf");
 #+end_src
 #+results:
-   [[file:img/simulacion-autocorrelacion.pdf]]
+[[file:img/simulacion-autocorrelacion.pdf]]
 
 ** Ejercicio 15
 
@@ -903,7 +904,8 @@
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src matlab :exports results :results file
   longitud_t = 10e-6;
-  t = 0:1/(4*Fs):longitud_t;
+  fs = 4*Fs;
+  t = 0:1/fs:longitud_t;
   
   chirps{1} = {mi_chirp(-2.5e-6,2.5e6,0,longitud_t,t), '5Mhz, 10us'};
   chirps{2} = {mi_chirp(-10e-6,10e6,0,longitud_t,t), '20Mhz, 10us'};
@@ -921,19 +923,18 @@
   
     correlacion = ifft(fft_chirp .* conj(fft_chirp));
   
-    plot(-length(correlacion)/2+1:length(correlacion)/2, fftshift(abs(correlacion)),'linewidth', 0.5);
+    plot(-length(correlacion)/2:length(correlacion)/2-1, fftshift(abs(correlacion)),'linewidth', 0.5);
   
     mitad = correlacion(length(correlacion)/2:end);
     
-    indices =find(correlacion <= 10); 
-    ancho_principal = (indices(1)*1.3)*2*1e-6/100;
+    indices =find(correlacion <= 100); 
+    ancho_principal = indices(1)*2/fs;
 
     compresion = longitud_t/ancho_principal;
   
     text(120,1300, ['Compresion: ', num2str(compresion,'%0.0f')]);
     title(chirps{i}{2});
     axis([-2000 2000 0 2000]);
-
   
     cambiarEjeX('%0.0fus',1/100);
   
@@ -951,8 +952,9 @@
    #+CAPTION: Autocorrelación de diferentes chirps (variación del ancho temporal)
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src matlab :exports results :results file
+  fs = 4*Fs;
   longitud_t = 10e-6;
-  t = 0:1/(4*Fs):longitud_t;
+  t = 0:1/fs:longitud_t;
   
   chirps{1} = {mi_chirp(-2.5e-6,2.5e6,0,10e-6,t), 10e-6};
   chirps{2} = {mi_chirp(-2.5e-6,2.5e6,0,15e-6,t), 15e-6};
@@ -972,8 +974,8 @@
 
     mitad = correlacion(length(correlacion)/2:end);
 
-    indices =find(correlacion <= 1); 
-    ancho_principal = indices(1)*2*1e-6/100;
+    indices =find(correlacion <= 100); 
+    ancho_principal = indices(1)*2/fs;
 
     longitud_t = chirps{i}{2};
 
@@ -1302,7 +1304,42 @@
 ** Ejercicio 20
 
    El ancho de banda de las chirps se encuentra ligeremente por arriba
-   de los 100Mhz y su duración temporal depende del $\eta-rango$.
+   de los 100Mhz y su duración temporal depende del $\eta-rango$ y se
+   puede observar en la figura
+   \ref{fig-longitud-chirp-vs-angulo}. Como el factor de compresión no
+   depende del ancho temporal, es el mismo para todas las chirps en
+   azimuth y es aproximadamente 273.
+
+   #+LABEL: fig-simulacion-autocorrelacion-azimuth
+   #+CAPTION: Autocorrelación de la chirp en azimuth
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+  Fs=1000;
+  t = 0:1/Fs:6;
+  chirp = mi_chirp(-50, 50 ,0, 6, t);
+  fft_chirp = fft(chirp,length(chirp)*2);
+  correlacion = ifft(fft_chirp .* conj(fft_chirp));
+
+  plot(-length(correlacion)/2:length(correlacion)/2-1, fftshift(abs(correlacion)),'linewidth', 2);
+
+    mitad = correlacion(length(correlacion)/2:end);
+    
+    indices =find(correlacion <= 100); 
+    ancho_principal = (indices(1)*2)/Fs;
+
+    compresion = 6/ancho_principal;
+  
+    text(20,1300, ['Compresion: ', num2str(compresion,'%0.0f')]);
+
+  grid();
+  axis([-50 50 0 3000]);
+  cambiarEjeX("%0.2fs",1/Fs);
+
+  ans = guardarImagen("img/simulacion-autocorrelacion-azimuth.pdf");
+#+end_src
+#+results:
+[[file:img/simulacion-autocorrelacion-azimuth.pdf]]
+
 
 ** Ejercicio 22
 
@@ -1348,6 +1385,46 @@
 #+results:
    [[file:img/azimuth-1.jpg]]
 
+
+   #+LABEL: fig-ventana-kaiser
+   #+CAPTION: Ventana utilizada
+   #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
+#+begin_src octave :exports results :results file
+
+   ventana = kaiser(100, 2.14)
+
+   subplot(311);
+   stem(0:length(ventana)-1, ventana, 'linewidth', 3);
+   grid();
+   legend('Kaiser(2.14)');
+
+   subplot(312);
+
+   stem(0:length(ventana)-1, 10*log10(ventana), 'linewidth', 3);
+
+   text(37,-2.5,'10*log_{10}(Kaiser(2.14))');
+   cambiarEjeY('%ddb',1);
+   grid();
+
+   subplot(313);
+   stem(-length(ventana)/2:length(ventana)/2-1, fftshift(abs(fft(ventana))), 'linewidth', 3);
+
+   legend('|DFT(Kaiser(2.14))|');
+   axis([-length(ventana)/2 length(ventana)/2-1]);
+   set(gca, 'interpreter', 'tex');
+
+   cambiarEjeX('%0.1f ',2/length(ventana));
+
+  set(gca, 'xtick', [-length(ventana)/2 -length(ventana)/4 0 length(ventana)/4-1 length(ventana)/2-1])
+  set(gca, 'interpreter', 'tex');
+  set(gca,'XTickLabel',{'-\pi' '-\pi/2' '0' '\pi/2' '\pi'}, 'interpreter', 'tex');
+
+   grid();
+
+   ans = guardarImagen('img/kaiser-4db.pdf');
+#+end_src
+#+results:
+   [[file:img/kaiser-4db.pdf]]
 
    #+LABEL: fig-compresion-azimuth-kaiser
    #+CAPTION: Imagen comprimida en azimuth (con ventaneo en la chirp)
@@ -1395,6 +1472,7 @@
    [[file:img/azimuth-kaiser.jpg]]
 
 
+   
    
 ** Opcional 2
    #+LABEL: fig-compresion-azimuth-kaiser-promediado
