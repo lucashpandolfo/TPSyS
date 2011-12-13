@@ -52,15 +52,15 @@
   h = 5375;
   n_near = 18.24*pi/180;
   c = 299792458;
-  Ts = 50e-6;
-  kmax = 20;
+  Ts = 1/Fs;
+  kmax = 35;
   r0 = h/(cos(n_near));
   rangos = r0:c*Ts/2:r0+kmax*c*Ts/2;
   plot(0:kmax,acos(h./rangos)*180/pi, 'linewidth', 4);
-  set(gca, 'ytick', 15:5:90);
-  axis([0 kmax 15 90]);
+  set(gca, 'ytick', 15:0.25:50);
+  axis([0 kmax 18.25 21.25]);
   set(gca, 'xtick', 0:kmax);
-  cambiarEjeY('%0.0f^o',1);
+  cambiarEjeY('%0.2f^o',1);
   cambiarEjeX('r_{%d}',1);
   grid();
   ans = guardarImagen('img/eta-vs-rango.pdf');
@@ -75,7 +75,7 @@
   h = 5375;
   n_near = 18.24*pi/180;
   c = 299792458;
-  Ts = 50e-6;
+  Ts = 1/Fs;
   kmax = 20;
   r0 = h/(cos(n_near));
   rangos = r0:c*Ts/2:r0+kmax*c*Ts/2;
@@ -83,10 +83,11 @@
   
   deltas = sin(etas).*rangos-shift(sin(etas).*rangos,1)
   plot(deltas(2:end), 'linewidth', 4);
-  axis([1 length(deltas)-1])
+  axis([1 length(deltas)-1 8.6 9.6])
   set(gca, 'interpreter', 'tex');
   set(gca, 'xtick', 1:length(deltas)-1);
   cambiarEjeX("r_{%d}",1);
+  cambiarEjeY('%0.1fm',1);
 
   grid();
   ans = guardarImagen("img/deltaR-vs-rango.pdf");
@@ -95,6 +96,7 @@
    [[file:img/deltaR-vs-rango.pdf]]
    
 \newpage
+
 
 * Parte analógica
 ** Ejercicio 2
