@@ -3,3 +3,4 @@ startup.m: Archivo de inicio de Matlab. Agrega el directorio './matlab/' al PATH
 ./matlab/: Directorio que contiene los '.m' utilizados
 
 Las matrices de datos ('SAR_data.mat' y 'SAR_data_subset.m') deben ubicarse en el subdirectorio './data/'
+
