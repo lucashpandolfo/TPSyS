@@ -1200,9 +1200,9 @@
   transformadas2 = transformadas;
   
   tic
-  for i= 1:columns(transformadas)
+  for i= 1:columns(transformadas)-64
       temp = abs(ifft(fft(transformadas(:,i),2*tam).*fft(filtro,2*tam)));
-    transformadas2(:,i) = temp(1:end/2);
+    transformadas2(:,i+64) = temp(1:end/2);
   end
   toc
   
@@ -1243,7 +1243,7 @@
   
 #+end_src
 #+results:
-   [[file:img/frecuencias-de-corte.pdf]]
+[[file:img/frecuencias-de-corte.pdf]]
    
 
 
@@ -1256,10 +1256,10 @@
    matriz (datos en azimuth) antes de promediar, e $y[n]$ a la n-esima
    columna de la matriz luego de promediar, tenemos que
 
-   $$y[n] = \frac{a_0 x[n] + a_1 x[n+1] + a_2 x[n+2] + \cdots + a_13 x[n+13] + a_14 x[n+14]}{N}$$
+   $$y[n] = \frac{a_{-7} x[n-7] + a_{-6} x[n-6] + a_{-5} x[n-5] + \cdots + a_{6} x[n+6] + a_{7} x[n+7]}{N}$$
 
    Donde $a_n$ son coeficientes que forman una ventana de bartlett de
-   ancho 15 y $\displaystyle N = \sum_{n=0}^{14} a_n$.
+   ancho 15 centrada en cero, y $\displaystyle N = \sum_{n=-7}^{7} a_n$.
 
    #+LABEL: fig-frecuencias-corte-segunda-estimacion
    #+CAPTION: Frecuencias de corte en azimuth y ancho de banda (segunda estimación)
@@ -1277,7 +1277,7 @@
   rango = -(rows(transformadas)/2)+1:(rows(transformadas)/2);
   clear en_rango;
   
-  n=128;
+  n=127;
   tam = rows(transformadas);
   filtro = rectwin(n) / n;
   filtro = bartlett(n) / sum(bartlett(n));
@@ -1285,9 +1285,9 @@
   transformadas2 = transformadas;
   
   tic
-  for i= 1:columns(transformadas)
+  for i= 1:columns(transformadas)-64
       temp = abs(ifft(fft(transformadas(:,i),2*tam).*fft(filtro,2*tam)));
-      transformadas2(:,i) = temp(1:end/2);
+      transformadas2(:,i+64) = temp(1:end/2);
   end
   toc
   
@@ -1303,9 +1303,9 @@
   transformadas3 = transformadas2;
   
   tic
-  for i= 1:columns(transformadas2)
+  for i= 1:columns(transformadas2)-8
     temp = abs(ifft(fft(transformadas2(:,i),2*tam).*fft(filtro,2*tam)));
-    transformadas3(:,i) = temp(1:end/2);
+    transformadas3(:,i+8) = temp(1:end/2);
   end
   toc
   clear transformadas2;
@@ -1343,7 +1343,7 @@
   ans = guardarImagen('img/frecuencias-de-corte-2.pdf');
 #+end_src
 #+results:
-   [[file:img/frecuencias-de-corte-2.pdf]]
+[[file:img/frecuencias-de-corte-2.pdf]]
 
 ** Ejercicio 20
 
@@ -1733,9 +1733,8 @@
     &=& y[n+m]
   \end{eqnarray*}
 #+END_LATEX
-   
-** Opcional 6
 
+** Opcional 6
 
 #+begin_src matlab :exports none
     PRF = 250;
@@ -1764,7 +1763,7 @@
       chirp_az = mi_chirp(-bw(i)/2, bw(i)/2, bw(i), duracion(i), t).';
       chirp_az = chirp_az .* kaiser(length(chirp_az), 2.14);
       centroide = (fc1(i)+fc2(i))/2;
-      columna = circshift(matriz(:,i),-round(centroide*rows(matriz)/PRF));
+      columna = circshift(matriz(:,i),0*round(centroide*rows(matriz)/PRF));
   
       comprimida(:,i) = ifft(conj(fft(chirp_az,l_max)) .* columna);
     end
@@ -1799,12 +1798,16 @@
   
   filtro = fft(ventana, longitud);
   matriz = fft(matriz, longitud);
-  
+  matriz1=matriz;
   tic
-  for i = 1:columns(matriz)
-    matriz(:,i) = ifft(matriz(:,i).*filtro);
+  for i = 1:columns(matriz)-4
+    matriz1(:,i+4) = ifft(matriz(:,i).*filtro);
   end
   toc
+  
+  matriz=matriz1;
+  
+  clear matriz1;
   
   colormap('gray');
   
@@ -1820,12 +1823,11 @@
   
   matriz(matriz>=max)=max;
   matriz(matriz<=min)=min;
-  
-    
+      
   set(gcf,'PaperUnits','inches','PaperPosition',[0 0 16 7])
     
   im = imresize(matriz, [rows(matriz)/8 columns(matriz)], 'cubic');
-  %  imagesc(matriz);
+  %imagesc(matriz);
   clear matriz;  
   imagesc(im);
   
