@@ -4,7 +4,7 @@
 #+LATEX_HEADER: \setlength{\parskip}{0cm}
 #+LATEX_HEADER: \parindent=0cm
 #+TITLE: 
-#+OPTIONS:  toc:nil
+#+OPTIONS:  toc:t
 #+LATEX_HEADER: \lhead{\includegraphics[width=1.5cm]{img/Logo-fiuba}} \chead{66.74  - Señales y Sistemas} \rhead{\Huge FIUBA}
 #+LATEX_HEADER: \lfoot{88581 - Pandolfo Lucas} \cfoot{\thepage} \rfoot{$2^{do}$ cuatrimestre 2011}
 
