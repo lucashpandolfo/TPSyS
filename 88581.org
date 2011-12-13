@@ -843,6 +843,9 @@
 
 ** Ejercicio 12
 
+   Vemos que si el PRF se reduce a la mitad, también se reduce a la
+   mitad el ancho de banda.
+
    #+LABEL: fig-modulo-espectro-azimuth-medio-prf
    #+CAPTION: Modulo del espectro en azimuth (medio PRF)
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
@@ -928,6 +931,16 @@
 
 ** Ejercicio 15
 
+   Según las simulaciónes, a mayor ancho de banda, mayor es el factor
+   de compresión. Con respecto a la duración temporal, los resultados
+   no difieren mucho al variarla. Intuyo que la variación que se
+   aprecia es debido ala inexactitúd del método con el que se mide,
+   pero puedo decir que se mantiene mas o menos constante (por
+   ejemplo, con chirps de 5MHz, si es de $5\mu s$ su factor de
+   compresión es 125, mientras que con una de $50 \mu s$ el factor es
+   de 122, y las duraciones intermedias suben y bajan sin seguir un
+   patrón).
+
    #+LABEL: fig-simulacion-autocorrelacion-dependencia
    #+CAPTION: Autocorrelación de diferentes chirps
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
@@ -936,12 +949,12 @@
   fs = 4*Fs;
   t = 0:1/fs:longitud_t;
   
-  chirps{1} = {mi_chirp(-2.5e-6,2.5e6,0,longitud_t,t), '5Mhz, 10us'};
-  chirps{2} = {mi_chirp(-10e-6,10e6,0,longitud_t,t), '20Mhz, 10us'};
-  chirps{3} = {mi_chirp(-20e-6,20e6,0,longitud_t,t), '40Mhz, 10us'};
-  chirps{4} = {mi_chirp(-30e-6,30e6,0,longitud_t,t), '60Mhz, 10us'};
-  chirps{5} = {mi_chirp(-40e-6,40e6,0,longitud_t,t), '80Mhz, 10us'};
-  chirps{6} = {mi_chirp(-50e-6,50e6,0,longitud_t,t), '100Mhz,10us'};
+  chirps{1} = {mi_chirp(-2.5e6,2.5e6,0,longitud_t,t), '5Mhz, 10us'};
+  chirps{2} = {mi_chirp(-10e6,10e6,0,longitud_t,t), '20Mhz, 10us'};
+  chirps{3} = {mi_chirp(-20e6,20e6,0,longitud_t,t), '40Mhz, 10us'};
+  chirps{4} = {mi_chirp(-30e6,30e6,0,longitud_t,t), '60Mhz, 10us'};
+  chirps{5} = {mi_chirp(-40e6,40e6,0,longitud_t,t), '80Mhz, 10us'};
+  chirps{6} = {mi_chirp(-50e6,50e6,0,longitud_t,t), '100Mhz,10us'};
   
   maximo = length(chirps);
   for i = 1:maximo
@@ -982,43 +995,43 @@
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
 #+begin_src matlab :exports results :results file
   fs = 4*Fs;
-  longitud_t = 10e-6;
+  longitud_t = 5*10e-6;
   t = 0:1/fs:longitud_t;
   
-  chirps{1} = {mi_chirp(-2.5e-6,2.5e6,0,10e-6,t), 10e-6};
-  chirps{2} = {mi_chirp(-2.5e-6,2.5e6,0,15e-6,t), 15e-6};
-  chirps{3} = {mi_chirp(-2.5e-6,2.5e6,0,30e-6,t), 30e-6};
-  chirps{4} = {mi_chirp(-2.5e-6,2.5e6,0,50e-6,t), 50e-6};
+  chirps{1} = {mi_chirp(-2.5e6,2.5e6,0,5e-6,t), 5e-6};
+  chirps{2} = {mi_chirp(-2.5e6,2.5e6,0,10e-6,t), 10e-6};
+  chirps{3} = {mi_chirp(-2.5e6,2.5e6,0,25e-6,t), 25e-6};
+  chirps{4} = {mi_chirp(-2.5e6,2.5e6,0,50e-6,t), 50e-6};
   
   maximo = length(chirps);
   for i = 1:maximo
     subplot(maximo/2,2,i)
-
+  
     chirp = chirps{i}{1};
     fft_chirp = fft(chirp,length(chirp)*2);
-
+  
     correlacion = ifft(fft_chirp .* conj(fft_chirp));
-
+  
     plot(-length(correlacion)/2+1:length(correlacion)/2, fftshift(abs(correlacion)),'linewidth', 0.5);
-
-    mitad = correlacion(length(correlacion)/2:end);
-
-    indices =find(correlacion <= 100); 
+  
+    mitad = correlacion(length(correlacion)/2+1:end);
+  
+    indices =find(correlacion <= 40); 
     ancho_principal = indices(1)*2/fs;
-
+  
     longitud_t = chirps{i}{2};
-
+  
     compresion = longitud_t/ancho_principal;
-
-    text(120,1300, ['Compresion: ', num2str(compresion,'%0.0f')]);
+  
+    text(10,1300, ['Compresion: ', num2str(compresion,'%0.0f')]);
     title(num2str(chirps{i}{2}*1e6,'5Mhz, %0.0fus'));
-    axis([-2000 2000 0 2000]);
-
-    cambiarEjeX('%0.0fus',1/100);
-
+    axis([-100 100 0 2000]);
+  
+    cambiarEjeX('%0.2fus',1/100);
+  
     grid();
   end
-
+  
   ans = guardarImagen('img/simulacion-autocorrelacion-dependencia-temporal.pdf');
 #+end_src
 #+results:
@@ -1336,8 +1349,9 @@
    de los 100Mhz y su duración temporal depende del $\eta-rango$ y se
    puede observar en la figura
    \ref{fig-longitud-chirp-vs-angulo}. Como el factor de compresión no
-   depende del ancho temporal, es el mismo para todas las chirps en
-   azimuth y es aproximadamente 273.
+   se ve afectado demasiado (ver ejercicio 15) por el ancho
+   temporal, asumimos el mismo para todas las chirps en azimuth y es
+   aproximadamente 273.
 
    #+LABEL: fig-simulacion-autocorrelacion-azimuth
    #+CAPTION: Autocorrelación de la chirp en azimuth
@@ -1654,6 +1668,7 @@
    
 
 ** Ejercicio 24
+
    #+LABEL: fig-simulacion-autocorrelacion-desplazada
    #+CAPTION: Autocorrelación de dos chirps de mismo ancho de banda con la frecuencia central desplazada
    #+ATTR_LaTeX: width=0.9\columnwidth placement=[H]
