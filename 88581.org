@@ -980,7 +980,7 @@
     title(chirps{i}{2});
     axis([-2000 2000 0 2000]);
   
-    cambiarEjeX('%0.0fus',1/100);
+    cambiarEjeX('%0.0fus',1e6/fs);
   
     grid();
   end
@@ -1029,7 +1029,7 @@
     title(num2str(chirps{i}{2}*1e6,'5Mhz, %0.0fus'));
     axis([-100 100 0 2000]);
   
-    cambiarEjeX('%0.2fus',1/100);
+    cambiarEjeX('%0.2fus',1e6/fs);
   
     grid();
   end
